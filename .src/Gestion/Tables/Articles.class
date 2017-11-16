@@ -1279,6 +1279,7 @@ Public Sub ToggleButton6_Click()
       Colcom.visible = False
     Else
       Colcom.visible = True
+      Colcom.Raise
       Colcom.Columns.count = 5
       Colcom.Columns[0].Width = 74
       Colcom.Columns[1].Width = 100
@@ -3630,6 +3631,7 @@ Public Sub ToggleButton1_click()
     Four.SetFocus
   Else
     fourlist.visible = True
+    fourlist.Raise
     fourlist.Columns.count = 2
     fourlist.Columns[0].Width = 80
     fourlist.Columns[1].Width = 180
@@ -3806,6 +3808,7 @@ Public Sub ToggleButton3_Click()
     Fam.SetFocus
   Else
     FamList.visible = True
+    FamList.Raise
     FamList.Columns.count = 2
     FamList.Columns[0].Width = 65
     FamList.Columns[1].Width = 180
@@ -3886,6 +3889,7 @@ Public Sub ToggleButton4_Click()
     ColMarque.visible = False
   Else
     ColMarque.visible = True
+    ColMarque.Raise
     ColMarque.Columns.count = 2
     ColMarque.Columns[0].Width = 65
     ColMarque.Columns[1].Width = 180

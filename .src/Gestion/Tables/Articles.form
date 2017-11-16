@@ -146,6 +146,7 @@
         MoveScaled(50,5.875,17,3)
         Font = Font["Serif,-1"]
         Background = &HD4D0C8&
+        Tag = "27"
         Alignment = Align.Right
         ReadOnly = True
         MaxLength = 10
@@ -1161,14 +1162,6 @@
         ToolTip = ("Cliquez pour récuperer une famille")
         Picture = Picture["Icones/next_frame.png"]
       }
-      { Fam TextBox Cmpt
-        Name = "Fam"
-        MoveScaled(1,3,8,3)
-        Font = Font["Serif,-1"]
-        Background = Color.TextBackground
-        Tag = "3"
-        MaxLength = 5
-      }
       { Four TextBox Cmpt
         Name = "Four"
         MoveScaled(59,3,10,3)
@@ -1201,6 +1194,11 @@
         Background = &HD4D0C8&
         ReadOnly = True
         MaxLength = 35
+      }
+      { fam textfamille Cmpt
+        Name = "fam"
+        MoveScaled(0,2,9,4)
+        Tag = "3"
       }
     }
     { TextLabel1 TextLabel

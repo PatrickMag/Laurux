@@ -794,7 +794,7 @@ End
 
 Public Sub Menu74_Click()
 
-  EdArt2.Show
+  EdArt4.Show
 
 End
 
@@ -1045,7 +1045,10 @@ End
 
 Public Sub Menu85_Click()
 
-  Edinv.Show
+  Dim ed As New Edinv("F")
+  
+  
+  Ed.Show
 
 End
 
@@ -1080,8 +1083,9 @@ Public Sub Menu98_Click()
 End
 
 Public Sub Menu99_Click()
-
-  EdinvT.Show
+  Dim ed As New Edinv("T")
+  
+  Ed.Show
 
 End
 

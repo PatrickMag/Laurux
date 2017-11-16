@@ -7,12 +7,15 @@ Private $ipr As Integer[]
 Private $texfam As TextBox[]
 
 Property text As String
+Event LostFocus()
+Event KeyPress()
 
 
 Public Sub _new()
 
   Dim i, lgr As Byte
-  
+
+  Me.Arrangement = Arrange.Horizontal
    'creation des textbox pour la saisie du code famille
   $ipr = Settings["/Soc" & Start.Societe & "/ipr"]
   Try i = $ipr.Count
@@ -46,6 +49,7 @@ End
 Public Sub codefam_lostfocus()
 
   Last.Background = Color.TextBackground
+  Raise LostFocus()
 
 End
 
@@ -55,14 +59,14 @@ Public Sub codefam_keypress()
 
   If Key.Code = Key.Return Or Key.Code = Key.Enter Or Key.Code = Key.Tab Then
     If Last = $texfam[$ipr.Max] Then
-      $texfam[0].setfocus
-      $texfam[0].Select
+      Raise KeyPress()
       Stop Event
       Return
     Endif
     While Last <> $texfam[i]
       Inc i
     Wend
+    Raise KeyPress()
     $texfam[i + 1].setfocus
     $texfam[i + 1].Select
     Stop Event
