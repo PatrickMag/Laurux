@@ -281,6 +281,9 @@
       { Menu253 Menu
         Text = Shortcut(("Impression des produits a commander"), "I")
       }
+      { mvst Menu
+        Text = ("Interrogation des mouvements de stock")
+      }
       { Menu325 Menu
         Text = ("Préparation des livraisons")
       }

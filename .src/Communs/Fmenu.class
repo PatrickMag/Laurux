@@ -2444,3 +2444,9 @@ Public Sub Menu326_Click()
   Stop Event
 
 End
+
+Public Sub mvst_Click()
+
+  Stockmvt.Show
+
+End
