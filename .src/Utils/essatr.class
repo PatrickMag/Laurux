@@ -1,0 +1,29 @@
+' Gambas class file
+
+Public Sub _new()
+
+  'defini l'ordre de saisie
+  TextReg1.prec = TextReg5
+  TextReg1.Suiv = TextReg2
+  TextReg2.prec = TextReg1
+  TextReg2.Suiv = TextReg3
+  TextReg3.prec = TextReg2
+  TextReg3.Suiv = TextReg4
+  TextReg4.prec = TextReg3
+  TextReg4.Suiv = TextReg5
+  TextReg5.prec = TextReg4
+  TextReg5.Suiv = TextReg1
+  
+  'textreg1 par default
+  TextReg2.numerique = True 'numerique qu'on veut avec nb indéfinie de décimales
+  'saisie numerique avec 1 nombre de décimale indéfini et affiche avec 3
+  TextReg3.numerique = True
+  TextReg3.nbdec = "3"
+  
+  TextReg4.reg = TextReg4.mail    'adresse mail en constante
+  'saisie et affichage numerique 3 décimales
+  TextReg5.numerique = True
+  TextReg5.reg = "-?[0-9]*[,.]?[0-9]{0,3}"
+  TextReg5.nbdec = "3"
+
+End
