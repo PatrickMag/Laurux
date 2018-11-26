@@ -842,7 +842,6 @@ Public Sub Moulinage()
 
 End
 
-    "fam Char(20)," &
 Public Sub Recup_Art(code As String, qtea As String, mht As String, mttc As String, tva As String)
 
   Dim Remtypec As Result
