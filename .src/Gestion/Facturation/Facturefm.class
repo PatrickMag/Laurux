@@ -247,6 +247,7 @@ Public Sub recup_bl()
     "ville Char(35)," &
     "totf Char(12)," &
     "tottc Char(12)," &
+    "gestbl Decimal(6,2)," &
     "PRIMARY KEY (code, nom))" & Utils.db.Engine())
   Utils.db.Exec("drop Table IF exists " & Tab4 & "")
   Utils.db.Exec("CREATE TABLE " & Tab4 &
