@@ -371,11 +371,11 @@ Private Function Edit(clt As Boolean) As Collection
     If suspendu.Value Then
       ed = New Ecomptamat(tabl, Textmois.Text, Textanne.Text, False)
       ed.Print(prt)
-      Visualiseur.Prog_Editeur(Filename)
+      Desktop.Open(Filename)
     Else
       ed = New Einvmat(tabl, Textmois.Text, Textanne.Text, False)
       ed.Print(prt)
-      Visualiseur.Prog_Editeur(Filename)
+      Desktop.Open(Filename)
     Endif
   Endif
   Application.Busy = 0
@@ -531,7 +531,7 @@ Public Sub detail_Click()
     Until resreg.MoveNext()
   Endif
   rpr.Print(prt)
-  Visualiseur.Prog(Filename)
+  Desktop.Open(Filename)
   
 End
 

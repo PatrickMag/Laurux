@@ -169,7 +169,7 @@ Public Sub btn_Click()
   $win.Close
   edt = New Edittipp($mois, $anne)
   edt.Print(prt)
-  Visualiseur.Prog(Filename)
+  Desktop.Open(Filename)
 
 End
 
