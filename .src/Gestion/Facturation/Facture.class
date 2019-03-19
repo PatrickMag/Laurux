@@ -10291,6 +10291,7 @@ Public Sub Impression(Org As String)
   Dim borientation As Boolean = False
   Dim ccd As Calculconsdroit
 
+  Object.Lock(Me)
   $process = True
   If $soption = "B" Or $soption = "T" Then i = 2 Else i = 0
   variables.typel = ""
@@ -10362,6 +10363,7 @@ Public Sub Impression(Org As String)
           rResult = Utils.db.Exec("SELECT * FROM " & tab5 & " left join Fiches_Commerciaux on code = cli_comm where cli_code = &1", Code3.Text)
           If Not rResult.Available Then
             $process = False
+            Object.Unlock(Me)
             Return
           Endif
           Ech = rResult!cli_cdech
@@ -10764,6 +10766,7 @@ Public Sub Impression(Org As String)
                             Endif
                             Message.Error("Il y a un souci avec le code " & code & " Impression impossible !")
                             $process = False
+                            Object.Unlock(Me)
                             Return
                           Endif
                           'Txtva = ArtRslt!mo_tva
@@ -10923,6 +10926,7 @@ Public Sub Impression(Org As String)
                       Cptvente = True
                       Me.mouse = Mouse.Default
                       $process = False
+                      Object.Unlock(Me)
                       Return
                     Endif
                   Endif
@@ -11602,6 +11606,7 @@ Public Sub Impression(Org As String)
     End With
     Me.Mouse = Mouse.Default
     $process = False
+    Object.Unlock(Me)
     Button16_Click()
     'Visudoc = False
     If Not IsNull(num.text) Then
@@ -11624,6 +11629,7 @@ Catch
   Endif
   Try message.Error(Error.Text & " " & Error.where)
   $process = False
+  Object.Unlock(Me)
   Me.Mouse = Mouse.Default
 
 End
