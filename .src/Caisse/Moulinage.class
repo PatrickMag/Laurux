@@ -1601,6 +1601,7 @@ Private Sub genfac()
   Dim pu, pxttc, mttc, mht, mtva, mremise As Float
   Dim snfac, snumlig, dnfac As String
   Dim ccd As Calculconsdroit
+  Dim vfac As VarFac
 
   'recuperation et maj du n° facture
   respar = utils.db.Exec("SELECT * FROM Fiches_Parametres")
@@ -1728,8 +1729,9 @@ Private Sub genfac()
       Endif
       utils.db.Commit
       If $soption = "B" Or $soption = "T" Then
-        ccd = New Calculconsdroit(snfac, "M")
-        ccd.comptmat(snfac)
+        vfac = New VarFac
+        ccd = New Calculconsdroit(vfac, snfac, "M")
+        ccd.comptmat(snfac, True)
       Endif
   Endif
 
