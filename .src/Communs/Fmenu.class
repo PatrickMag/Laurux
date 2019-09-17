@@ -2611,3 +2611,9 @@ Public Sub Menu332_Click()
   
 
 End
+
+Public Sub Menu300_Click()
+
+  Mreglement.Show
+
+End
