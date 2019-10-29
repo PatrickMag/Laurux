@@ -24,21 +24,15 @@ Private log As LLog
 
 
 '************************************** Gestion des articles *****************************************************
-Public Sub _new(Barticle As Boolean, Bstocke As Boolean, TriArticle As String, sOrg As String, Selection As String, Option As String, Optional Dispo As Boolean = False, Optional Mat As Boolean = False, Optional ob As Object = Null)
+Public Sub _new(Barticle As Boolean, Bstocke As Boolean, TriArticle As String, Selection As String, Option As String, Optional Dispo As Boolean = False, Optional Mat As Boolean = False, Optional ob As Object = Null)
 
   Utils.Observers(Me)
   Me.Center
   Obj = ob
-  
-  If sOrg = "Me" Then
-    If Object.IsValid(Obj) Then
-      Object.SetProperty(Obj, "Bsel", False)
-      Object.SetProperty(Obj, "Bval", Null)
-    Endif
-  Else
-    Utils.Log(Me, "Must rework TriArticle", LLog.MessageBox)
+  If Object.IsValid(Obj) Then
+    Object.SetProperty(Obj, "Bsel", False)
+    Object.SetProperty(Obj, "Bval", Null)
   Endif
-
   CB2.Text = ""
   Org = ""
   Select Case Option

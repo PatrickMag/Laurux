@@ -4398,7 +4398,7 @@ Public Sub SelectionArt()
   Endif
   ChkFocus = 2
   Tri = "art_code"
-  MyForm = New TriArticles(Bart.Value, B2art.Value, Tri, "Me", "", "Fournisseur", Null, False, False, Me)
+  MyForm = New TriArticles(Bart.Value, B2art.Value, Tri, "", "Fournisseur", Null, False, False, Me)
   MyForm.Showmodal()
   If Bsel = True Then
     Variables.$Codearticle = Bval 'variable a supprimer
