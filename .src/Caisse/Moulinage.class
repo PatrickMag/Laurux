@@ -3061,7 +3061,8 @@ Private Sub genfac()
       Endif
       utils.db.Commit
       If $soption = "B" Or $soption = "T" Then
-        ObjFacB(snfac, "M").comptmat(snfac, True)
+        ccd = New ObjFacB(snfac, ObjFac.magasin)
+        ccd.comptmat(snfac, True)
       Endif
   Endif
 

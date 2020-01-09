@@ -164,6 +164,8 @@ Private Val_retro As String ' variable pour coeff retrocession
 Private Blexists As Boolean = False
 Private RecapSoldeCli As Boolean = False
 Private $keyObserver As Observer
+Private $win As Window
+Private $MyForm2 As SaiReg
 
 ' Méthode de connexion au module BA6X
 Public Sub InitBA6X(uneAdresseIP As String, unPort As Integer)
@@ -5732,12 +5734,7 @@ Public Sub Enrg_Tk(Supprime As Boolean) As String
     numero_tk = numtk
   Endif
   'On recupère le dernier ticket validé dans la table des paramètres
-  rLastTk = Utils.db.Exec("Select dntk From " & Cbase.Table("TabParam"))
-  If rLastTk.Available Then
-    prev_numero = rLastTk!dntk
-  Else
-    prev_numero = ""
-  Endif
+  prev_numero = LastTik()
   
   rResult = Utils.db.Exec("select * FROM Fiches_EntTicketz where caisse = &1 and numero = &2", Ncaisse, numero_tk)
   If rResult.Available Then
@@ -5869,7 +5866,7 @@ Public Sub Enrg_Tk(Supprime As Boolean) As String
     If IsNull(scartef) Then scartef = $Cli
     If Not IsNull($Nomd) Then $Cli = $Nomd
 
-    Tab = "Fiches_LigTicketz"
+    tab = "Fiches_LigTicketz"
     'On enregistre toutes les lignes du ticket
     LigTk.MoveFirst()
     Repeat
@@ -6071,6 +6068,21 @@ Label_CleanUp:
 
   Return numero_tk
 
+End
+
+Public Function LastTik() As String
+  
+  Dim rLastTk As Result
+  Dim prev_numero As String
+  
+  rLastTk = Utils.db.Exec("Select dntk From " & Cbase.Table("TabParam"))
+  If rLastTk.Available Then
+    If IsNull(rLastTk!dntk) Then prev_numero = "0" Else prev_numero = rLastTk!dntk
+  Else
+    prev_numero = ""
+  Endif
+  Return prev_numero
+  
 End
 
 Public Sub Init_LigTk()
@@ -7190,7 +7202,7 @@ End
 Public Sub Button30_click()
 
   Dim MyForm As Triclients
-  Dim MyForm2 As Tribl
+'  Dim MyForm2 As Tribl
   Dim numero_tk As String
 
   If iRattente = 0 Then
@@ -7222,11 +7234,16 @@ Public Sub Button30_click()
           Endif
         Endif
       Case 2
-        MyForm = New Triclients("Me", Null, Me)
+        MyForm = New Triclients("Me", Null, Me) 
         MyForm.Showmodal()
         If Bsel = True Then
-          MyForm2 = New Tribl(Bval, numero_tk)
-          MyForm2.Showmodal()
+'          MyForm2 = New Tribl(Bval, numero_tk)
+          $win = New Window 
+          $MyForm2 = New SaiReg($win, VarEcr.caisse, Bval, numero_tk) As "win"
+          $win.w = $MyForm2.W
+          $win.H = $MyForm2.H
+          $win.Border = False
+          $win.Showmodal()
           Blexists = Ajout_Reg_Bl(numero_tk)
         Endif
       Case 3
@@ -7242,6 +7259,167 @@ Public Sub Button30_click()
 
 End
 
+Public Sub win_close()
+
+  $MyForm2.Form_Close()
+  $win.Close
+
+End
+
+Public Sub win_RegCaisse(Optional nmt As Float, typ As Integer, ntk As String, doc As String)
+
+  Dim res, reslig, rescli, lstnum As Result
+  Dim numlig, prev_numero As String
+  
+  utils.db.Begin
+  'dernier passage de la saisie des réglements avec maj des fichiers entete et ligne
+  If typ = Mreglement.sans_caisse Then
+    res = utils.db.Edit("Fiches_EntTicketz", "Numero=&1", ntk)
+    res!prev_numero = LastTik()
+    prev_numero = res!prev_numero
+    res!mttc = Format(nmt, "0.00")
+    res.Update
+    lstnum = utils.db.Exec("SELECT numlig FROM Fiches_LigTicketz WHERE numero=&1 ORDER BY numlig DESC", ntk)
+    numlig = Str(Val(lstnum!numlig) + 1)
+    reslig = utils.db.Create("Fiches_LigTicketz")
+    reslig!numero = ntk
+    reslig!numlig = numlig
+    reslig!block = numlig
+    reslig!date = Now
+    reslig.Update
+    utils.db.Commit
+    Sha1Calc.CalcSha1T("Fiches_EntTicketz", ntk, prev_numero)
+   'Si ce n'est pas un ticket mis en attente on met a jour le numero du dernier Ticket validé
+    If iAttente = 0 Then
+      Utils.db.Exec("UPdate  " & Cbase.Table("TabParam") & "  SET dntk = &1", ntk)
+    Endif
+    'On autorise la caisse a se reattribuer un nouveau numéro si le ticket n'est pas un tiquet rappelé
+    If iRattente = 0
+      Utils.db.Exec("Update " & Cbase.Table("TabCaisses") & " set cutk = &1 where code = &2", Null, Ncaisse)
+    Endif
+  
+    LigTk.Clear
+      Init_LigTk()
+      Ent_tk(Null)
+      TotalTk.Text = "0,00"
+      Cart.SetFocus
+      Zone = "Article"
+      iQte = 0
+      iRem = 0
+      iAttente = 0
+      iRattente = 0
+      iAvoir = 0
+      iNlg = 0
+      iligne = 0
+      Tottva = 0
+      Totalht = 0
+      Clicompte = 0
+      rremT = 0
+      RemTot.Text = ""
+      bretro = False
+      bmodifregl = False
+    Return
+  Endif
+  'on maj les fichiers caisse sur chaque réglement saisie dans la saisie des règlements
+  res = utils.db.Exec("SELECT * FROM Fiches_EntTicketz WHERE numero=&1", ntk)
+  If res.Available Then
+    res = utils.db.Edit("Fiches_EntTicketz", "Numero=&1", ntk)
+  Else
+    reslig = utils.db.Create("Fiches_LigTicketz")
+    rescli = utils.db.Exec("SELECT cli_nom FROM Fiches_Cli WHERE cli_code=&1", Bval)
+    If res.Available Then 
+      reslig!code = Left(rescli!cli_nom, 15)
+    Endif
+    reslig!numero = ntk
+    reslig!numlig = "1"
+    reslig!Intitule = "Règlement Document " & doc
+    reslig!type = "BL"
+    reslig!block = "1"
+    reslig!date = Now
+    reslig.Update
+    reslig = utils.db.Create("Fiches_LigTicketz")
+    reslig!numero = ntk
+    reslig!numlig = "2"
+    reslig!Intitule = "-------------------- "
+    reslig!type = "L" 
+    reslig!block = "2"
+    reslig!date = Now
+    reslig.Update
+    
+    res = utils.db.Create("Fiches_EntTicketz")
+    res!caisse = Ncaisse
+    res!numero = ntk
+    res!client = clicode
+    res!date = Now
+    res!statut = "0"
+    res!savoir = "0"
+    res!type = "0"
+    res!vendeur = Caissiere
+    res!retro = False
+    res!suppr = False
+    res!mespeces = "0"
+    res!mcheque = "0"
+    res!mcarte = "0"
+    res!mcredit = "0"
+    res!mbachat = "0"
+    res!mavoir = "0"
+    res!points = 0.00
+    res!mbonus = "0"
+    res!mresto = "0"
+    res!mautre = "0"
+  Endif
+  lstnum = utils.db.Exec("SELECT numlig FROM Fiches_LigTicketz WHERE numero=&1 ORDER BY numlig DESC", ntk)
+  numlig = Str(Val(lstnum!numlig) + 1)
+  reslig = utils.db.Create("Fiches_LigTicketz")
+  reslig!numero = ntk
+  reslig!numlig = numlig
+  reslig!block = "2"
+  reslig!date = Now
+  reslig!montant = Format(nmt, "0.00")
+  
+  Select Case typ
+    Case Mreglement.espece
+      res!sespeces = "N"
+      res!mespeces = Format(Val(res!mespeces) + nmt, "0.00")
+      reslig!intitule = "Espece : "
+      reslig!type = "N"
+      
+    Case Mreglement.cheque
+      res!scheque = "V"
+      res!mcheque = Format(Val(res!mcheque) + nmt, "0.00")
+      reslig!intitule = "Cheque : "
+      reslig!type = "V"
+      
+    Case Mreglement.carte
+      res!scarte = "U"
+      res!mcarte = Format(Val(res!mcarte) + nmt, "0.00")
+      reslig!intitule = "Carte : "
+      reslig!type = "U"
+    
+    Case Mreglement.bon_achat
+      res!sbachat = "X"
+      res!mbachat = Format(Val(res!mbachat) + nmt, "0.00")
+      reslig!intitule = "Bon achat"
+      reslig!type = "X"
+    
+    Case Mreglement.cheque_entreprise
+    res!sresto = "1"
+    res!mresto = Format(Val(res!mresto) + nmt, "0.00")
+    reslig!intitule = "Cheque entreprise"
+    reslig!type = "1"
+    
+    Case Else
+      res!sautre = "E"
+      res!mautre = Format(Val(res!mautre) + nmt, "0.00")
+      reslig!intitule = "Autre Règlement"
+      reslig!type = "E"
+      
+  End Select
+  res.Update
+  reslig.Update
+  utils.db.Commit
+
+End
 '******************************************
 '*      Selection du  code client         *
 '******************************************

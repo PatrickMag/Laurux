@@ -1858,7 +1858,8 @@ End
 
 Public Sub Menu194_Click()
 
-  Edpaiement.ShowModal()
+  SaiReg.ShowModal
+  'Edpaiement.ShowModal()
 
 End
 

@@ -742,7 +742,7 @@ Public Sub ecriture(numcpt As String, tot As Float, intitule As String)
       lignecom.intitule = intitule
       lignecom.libelle = "FACTURE " & resent!nmclibl
       lignecom.dte = $dtedoc.G
-      lignecom.dateech = $dteech.G
+      If Not IsNull($dteech) Then lignecom.dateech = $dteech.G
       lignecom.numdoc = $numfac
       lignecom.numlot = $numfac
       If tot < 0 Then
@@ -1074,7 +1074,7 @@ Private Sub solde(num As String)
   
   Dim resmvt As Result
   
-  resmvt = utils.db.Exec("SELECT SUM(montantd) AS montantd,SUM(montantc) AS montantc FROM Fiches_Mvt WHERE compte=&1", num)
+  resmvt = utils.db.Exec("SELECT SUM(montantd) AS montantd,SUM(montantc) AS montantc FROM Fiches_Mvt WHERE compte=&1 AND provisoire=False", num)
   If resmvt.Available Then 
     If IsNull(resmvt!montantd) Or IsNull(resmvt!montantc) Then
        Message.Error("Il y a un problème avec le compte : " & num & " calcul du solde impossible")
