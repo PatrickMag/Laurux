@@ -47,7 +47,7 @@ Public Sub _new(vfac As VarFac, cal As CalFac)
         If res!cp_sc Or res!burdis_sc Then Me.ville.Text = res!cp_sc & "  " & res!burdis_sc Else Me.ville.Height = "0mm"
         If res!cap_sc Then Me.cap.Text = "Capital : " & res!cap_sc Else Me.cap.Height = "0mm"
         Me.rcs.Text = "Rcs : " & res!rcs_sc & "  " & res!villerc_sc
-        Me.siret.Text = "Siret : " & res!siret_sc
+        Me.siret.Text = $vfac.libsire & " " & res!siret_sc
         Me.ape.Text = "APE : " & res!ape_sc
         Me.tvaintra.Text = "Tva intra : " & res!tvaintra_sc
         Me.tel.Text = "Tel : " & res!tel_sc
@@ -69,6 +69,10 @@ Public Sub _new(vfac As VarFac, cal As CalFac)
   If vfac.lgo Then
     Me.logo.Image = Image.Load(Start.LocalSettings["/Soc" & Start.Societe & "/Logo"])
   Endif
+  'lbelle tva
+  Me.ltt.Text = "Taux " & $vfac.libtaxe
+  Me.lmtv.Text = "Montant " & $vfac.libtaxe
+  Me.ltoh.Text = "Total " & $vfac.libtaxe
   'adresse client
   Me.nom.Text = Left(vfac.adrfac.nom, 35)
   Me.adr1.Text = vfac.adrfac.adr1
@@ -243,6 +247,7 @@ Public Sub _new(vfac As VarFac, cal As CalFac)
     Me.rrme.Width = "0mm"
   Endif
   'affichage des totaux ht/tva/ttc
+  
   Me.tht.Text = Format(cal.montht, ",0.00")
   Me.ttva.Text = Format(cal.monttva, ",0.00")
   Me.tttc.Text = Format(cal.montttc, ",0.00") & " " & vfac.devise
@@ -257,7 +262,7 @@ Public Sub _new(vfac As VarFac, cal As CalFac)
     If Not vfac.autoent Then Me.autoent.Text = ""
   Endif
   'pied de facture
-  If vfac.pied Then
+  If vfac.pied And If Not IsNull(vfac.tpied) Then
     If vfac.tpied.Count > 0 Then Me.tbf1.Text = vfac.tpied[0]
     If vfac.tpied.Count > 1 Then Me.tbf2.Text = vfac.tpied[1]
     If vfac.tpied.Count > 2 Then Me.tbf3.Text = vfac.tpied[2]
@@ -327,7 +332,7 @@ Public Sub _new(vfac As VarFac, cal As CalFac)
     Me.recap.Children.Clear
     Me.recap.Height = "0mm"
   Endif
-  If Not (Me.gest.Text Or Me.tbf5) Then
+  If Not (Me.gest.Text Or Me.tbf5.Text) Then
     Me.rgest.Children.Clear
     Me.rgest.Height = "0mm"
   Endif

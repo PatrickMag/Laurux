@@ -1,7 +1,7 @@
 # Gambas Form File 3.0
 
 { Form Form
-  MoveScaled(0,0,65,40)
+  MoveScaled(0,0,66,67)
   Text = ("Table de la TIPP régionale")
   { Label1 Label
     MoveScaled(2,7,13,3)
@@ -36,7 +36,7 @@
     MoveScaled(42,15,9,3)
   }
   { Panel1 Panel
-    MoveScaled(2,29,59,5)
+    MoveScaled(2,29,62,5)
     Arrangement = Arrange.Horizontal
   }
   { Label4 Label
@@ -45,5 +45,8 @@
   }
   { Label6 Label
     MoveScaled(4,19,29,3)
+  }
+  { naf GridView
+    MoveScaled(2,35,63,31)
   }
 }

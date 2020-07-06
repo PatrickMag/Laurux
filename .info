@@ -1,6 +1,10 @@
 #LDate
 
 CA
+:change
+:
+
+(value)LDate;
 L
 p
 s
@@ -24,6 +28,10 @@ s
 DT
 p
 s
+
+FinMois
+r
+LDate
 
 EDeb
 r
@@ -49,7 +57,7 @@ _New
 m
 
 [(DateOrYear)v(Month)i(Day)i(Hour)i(Minute)i(Second)i(Millisecond)i]
-_Call
+_call
 m
 LDate
 [(DateOrYear)v(Month)i(Day)i(Hour)i(Minute)i(Second)i(Millisecond)i]
@@ -77,14 +85,18 @@ Periode_Fin
 m
 LDate
 [(Mois)LDate;]
+Fin_Mois
+m
+LDate
+
 Apres
 m
 b
-(compdate)LDate;
+(compdate)LDate;[(strict)b]
 Avant
 m
 b
-(compdate)LDate;
+(compdate)LDate;[(strict)b]
 Exercice_Cloture
 m
 LDate
@@ -115,6 +127,10 @@ s
 #TextReg
 ButtonBox
 CA
+dte
+v
+LDate
+
 num
 C
 s
@@ -127,11 +143,19 @@ mail
 C
 s
 "[a-zA-Z0-9_.+-]+@?[a-zA-Z0-9.-]*"
+dts
+C
+s
+"[0-9]{1,2}[./-]?[0-9]{0,2}[./-]?[0-9]{0,4}"
 Value
 p
 f
 
 numerique
+p
+b
+
+Dat
 p
 b
 
@@ -147,6 +171,10 @@ MaxLenght
 p
 i
 
+Text
+p
+s
+
 _new
 m
 
@@ -156,6 +184,14 @@ m
 
 
 butb_keypress
+m
+
+
+Select
+m
+
+[(start)i(length)i]
+butb_DblClick
 m
 
 
@@ -171,10 +207,10 @@ butb_lostfocus
 m
 
 
-Select
+dte_change
 m
 
-[(start)i(length)i]
+(dt)LDate;
 Unselect
 m
 

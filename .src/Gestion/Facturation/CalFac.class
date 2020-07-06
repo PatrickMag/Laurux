@@ -200,6 +200,7 @@ Public Sub _new(vafac As VarFac, Optional nom As String)
     vfac.adrfac.adr2 = vfac.resent!adr2bl
     vfac.adrfac.cp = vfac.resent!cpbl
     vfac.adrfac.ville = vfac.resent!villebl
+    gestion = 0
     Repeat 
       If CFloat(vfac.resent!gestbl) <> 0 Then
         gestion = vfac.resent!gestbl
@@ -230,6 +231,7 @@ Public Sub _new(vafac As VarFac, Optional nom As String)
     If Object.IsValid(tva) Then
       For Each lignetva1 In tva
         lignetva1.tottva = lignetva1.totht * (lignetva1.taux / 100)
+        If vfac.pxsdec Then lignetva1.tottva = Round(lignetva1.tottva, 0)
         tva[lignetva1.num] = lignetva1
         monttva += utils.arrondi(lignetva1.tottva, 2) 
         respar = utils.db.Exec("SELECT compte_cc,intitule_cc FROM Fiches_Tvaav,Fiches_Comptes WHERE compte_cc=cc_tva AND code_tva=&1", lignetva1.num)
@@ -308,7 +310,7 @@ Private Sub calc(numlig As String)
     ligneart.neht = mult(ligneart.neht, txtva, "2")
   Endif
   If vfac.pxsdec Then              'si facture sans décimal
-    ligneart.puht = mult(ligneart.puht, 1, " resart!art_nbd")
+    ligneart.puht = mult(ligneart.puht, 1, resart!art_nbd)
     ligneart.brht = mult(ligneart.brht, 1, "0")
     ligneart.neht = mult(ligneart.neht, 1, "0")
   Endif

@@ -1,17 +1,17 @@
 # Gambas Form File 3.0
 
 { Form Form
-  MoveScaled(0,0,74,108)
+  MoveScaled(0,0,75,103)
   Font = Font["-1"]
   Text = ("Edition des documents")
   Arrangement = Arrange.Horizontal
   AutoResize = True
   { Panel1 Panel
-    MoveScaled(1,1,72,105)
+    MoveScaled(1,1,72,99)
     Arrangement = Arrange.Horizontal
     AutoResize = True
     { VBox1 VBox
-      MoveScaled(1,1,71,103)
+      MoveScaled(2,-1,71,100)
       AutoResize = True
       { Panel2 Panel
         MoveScaled(0,1,73,31)
@@ -101,7 +101,7 @@
         }
       }
       { Pbl Panel
-        MoveScaled(0,33,69,12)
+        MoveScaled(0,33,66,11)
         Visible = False
         Font = Font["-1"]
         AutoResize = True
@@ -130,7 +130,7 @@
           Text = ("Impression récap BL")
         }
         { Blch CheckBox
-          MoveScaled(0,0,11,3)
+          MoveScaled(0,0,20,2)
           Font = Font["Serif,-1"]
           ToolTip = ("A cocher si vous souhaitez imprimer un BL chiffré")
           Text = ("BL chiffré")
@@ -138,11 +138,11 @@
         }
       }
       { Pfac Panel
-        MoveScaled(0,45,69,11)
+        MoveScaled(0,45,66,7)
         Visible = False
         AutoResize = True
         { Reserve CheckBox
-          MoveScaled(0,0,22,2)
+          MoveScaled(6,0,22,2)
           Font = Font["Serif,-1"]
           Text = ("Edition des reserves")
         }
@@ -171,13 +171,13 @@
         }
       }
       { Preg Panel
-        MoveScaled(1,56,69,14)
+        MoveScaled(1,56,70,13)
         Visible = False
         Enabled = False
         AutoResize = True
         Border = Border.Plain
         { HBox9 HBox
-          MoveScaled(0,0,34,3)
+          MoveScaled(11,0,23,3)
           { Label1 Label
             MoveScaled(11,2,6,1)
             Font = Font["Serif,-1"]
@@ -222,7 +222,7 @@
         }
       }
       { HBox1 HBox
-        MoveScaled(1,73,69,5)
+        MoveScaled(1,70,67,5)
         AutoResize = True
         { mail Button
           MoveScaled(0,0,14,4)
@@ -246,7 +246,6 @@
           Font = Font["Serif,Bold,-1"]
           Background = Color.ButtonBackground
           ToolTip = ("Cliquez ici pour visualiser le document.")
-          Drop = True
           Expand = True
           Text = Shortcut(("Visualiser"), "u")
           Picture = Picture["Icones/find.png"]
@@ -256,6 +255,7 @@
           #Public = True
           Font = Font["Serif,Bold,-1"]
           Background = Color.ButtonBackground
+          Tracking = True
           ToolTip = ("Imprime le résultat sur l'imprimante")
           Expand = True
           AutoResize = True
@@ -266,15 +266,19 @@
           Font = Font["Serif,Bold,-1"]
           Background = Color.ButtonBackground
           ToolTip = ("Annule l'impression des bons")
-          Drop = True
           Expand = True
           Text = Shortcut(("Fermer"), "r")
         }
       }
       { padliv Panel
-        MoveScaled(1,79,70,23)
+        MoveScaled(2,77,67,19)
         Visible = False
         AutoResize = True
+        { Date3 Label
+          MoveScaled(5,0,17,3)
+          Font = Font["Serif,-1"]
+          Text = ("Nom et prénom")
+        }
         { ToggleButton10 ToggleButton
           MoveScaled(60,0,3.6667,3.6667)
           ToolTip = ("Bouton de recherche des adresses de livraison.")
@@ -288,11 +292,6 @@
           NoTabFocus = True
           ToolTip = ("Escape pour sortir\nF2 pour afficher toutes les adresses de livraison")
           ScrollBar = Scroll.Vertical
-        }
-        { Date3 Label
-          MoveScaled(0,0,17,3)
-          Font = Font["Serif,-1"]
-          Text = ("Nom et prénom")
         }
         { Nombl TextReg
           MoveScaled(18,0,41,3)

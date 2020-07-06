@@ -1109,8 +1109,6 @@ Public Sub Colcli_Click()
         Desktop.Open(rDoc!doc)
       Until rDoc.MoveNext()
     Endif
-  Else
-    Colcli.Sorted = True
   Endif
 
 End

@@ -14,7 +14,9 @@ Private $sdec As String
 Public Sub _new(Optional num As String)
 
   Dim obs As Observer
-
+  Dim ch As Chainage
+  
+  ch = New Chainage([Textcode, Textmz, Textsup, Textrev])
   Utils.Observers(Me)
 '  couleur du background du TextBox
   $sFrmt = Utils.FColr(Settings["/Coul/Znss"])
@@ -65,7 +67,6 @@ End
 Public Sub cmpt_gotfocus()
 
   Try Last.text = Replace(Last.text, ".", ",")
-  Try Utils.ObsGotf(Last)
 
 End
 
@@ -79,20 +80,6 @@ Public Sub cmpt_lostfocus()
     Last.SetFocus
     Return
   Endif
-  Try Utils.ObsLstf(Last)
-
-End
-
-Public Sub cmpt_keypress()
-
-  If Key.Code = Key.Return Or Key.Code = Key.Enter Then
-    Last.Next.SetFocus
-  Endif
-
-End
-Public Sub Textcode_GotFocus()
-
-  Try Utils.ObsGotf(Last)
 
 End
 
@@ -141,13 +128,9 @@ End
 Public Sub tableview1_Save(Row As Integer, Column As Integer, Value As String)
 
   Value = Replace(value, ",", ".")
-  If Not IsNumber(value) Then 
-    tableview1[row, Column].Clear
-    Stop Event
-    Return
-  Else
-    tableview1[row, Column].Text = Format(Value, "0")
-  Endif
+  If Not IsNumber(value) Then value = "0"
+  tableview1[row, Column].Text = Format(Value, "0")
+
   tableview1[row, Column].Alignment = Align.Right
   
   Select Case Column
@@ -176,6 +159,7 @@ Public Sub tableview2_Save(Row As Integer, Column As Integer, Value As String)
 
   tableview2[row, Column].Alignment = Align.Right
   Value = Replace(value, ",", ".")
+  If IsNull(value) Then value = "0"
   tableview2[row, Column].Text = Format(Value, "0.00")
   Select Case Column
     Case 1, 3
@@ -185,7 +169,6 @@ Public Sub tableview2_Save(Row As Integer, Column As Integer, Value As String)
     
   End Select
   
-
 End
 
 Public Sub button1_Click()
@@ -302,8 +285,8 @@ Public Sub Button3_Click()    'enregistrer
   res!supqs = Val(Textsup.Text)
   res.Update
   
-  i = 0
-  While i < tableview2.Rows.Max
+  For i = 0 To tableview2.Rows.Max
+    If Not tableview2[i, 0].Text And Not tableview2[i, 1].Text Then Continue
     res = Utils.db.Create("Fiches_ligtarpp")
     brn = Split(tableview2[i, 0].Text, "-")
     res!code = Textcode.Text
@@ -312,14 +295,14 @@ Public Sub Button3_Click()    'enregistrer
     res!bsup = Val(brn[1]) / $icoef
     res!normht = Val(tableview2[i, 1].Text)
     res!supht = Val(tableview2[i, 3].Text)
-    j = 0
-    Repeat
-      If brn[0] = tableview1[j, 0].Text And brn[1] = tableview1[j, 1].Text Then res!marht = Val(tableview1[j, 2].Text)
-      Inc j
-    Until (brn[0] = tableview1[j - 1, 0].Text And brn[1] = tableview1[j - 1, 1].Text) Or j = tableview1.Rows.Count
-    Inc i
+    For j = 0 To tableview1.Rows.Max
+      If brn[0] = tableview1[j, 0].Text And brn[1] = tableview1[j, 1].Text Then 
+        res!marht = Val(tableview1[j, 2].Text)
+        Break
+      Endif
+    Next
     res.Update
-  Wend
+  Next
   Utils.db.Commit
 
 End

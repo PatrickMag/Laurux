@@ -3,6 +3,26 @@
 Private bs As Barselection
 Private $resreg As Result
 Private $ind As Integer
+Private $res As Result
+
+Public Sub _new()
+  
+  naf.Header = GridView.Horizontal
+  naf.Mode = Select.Single
+  naf.Columns.Count = 5
+  naf.Columns[0].Text = "Date"
+  naf.Columns[0].Width = 120
+  naf.Columns[1].Text = "N° Fact"
+  naf.Columns[1].Width = 120
+  naf.Columns[2].Text = "N° Lig"
+  naf.Columns[2].Width = 60
+  naf.Columns[3].Text = "Nom"
+  naf.Columns[3].Expand = True
+  naf.Columns[4].Text = "Qte"
+  naf.Columns[4].Width = 100
+  litfich()
+  
+End
 
 Public Sub form_Open()
 
@@ -24,6 +44,14 @@ Public Sub form_Open()
 
 End
 
+Public Sub naf_Activate()
+
+  $res.MoveTo(naf.Row)
+  utils.db.Exec("UPDATE Fiches_HistoLigfac SET tipp_ligfac=&1 WHERE num_ligfac=&2 AND numlig_ligfac=&3", Textcode.Text, naf[naf.Row, 1].Text, naf[naf.Row, 2].Text)
+  litfich()
+
+End
+
 Public Sub cmpt_gotfocus()
 
   Try Utils.ObsGotf(Last)
@@ -34,6 +62,23 @@ Public Sub cmpt_lostfocus()
 
   Try Utils.ObsLstf(Last)
 
+End
+
+Private Sub litfich()
+  
+  $res = utils.db.Exec("SELECT * FROM Fiches_HistoLigfac,Fiches_HistoFac,Fiches_Cli WHERE numfac=num_ligfac AND cli_code=cdclifac AND (code_ligfac='401' OR code_ligfac='404' OR code_ligfac='397') AND cli_tipp IS NOT NULL AND tipp_ligfac IS NULL")
+  If $res.Available Then
+    naf.Rows.Count = $res.Count
+    Repeat
+      naf[$res.Index, 0].Text = LDate($res!datefac).L
+      naf[$res.Index, 1].Text = $res!numfac
+      naf[$res.Index, 2].Text = $res!numlig_ligfac
+      naf[$res.Index, 3].Text = $res!nmclifac
+      naf[$res.Index, 4].Text = $res!qte_ligfac
+      naf[$res.Index, 4].Alignment = Align.Right
+    Until $res.MoveNext()
+  Endif
+  
 End
 
 Public Sub bar1_annule(creer As Boolean, anul As Boolean)
