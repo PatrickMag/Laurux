@@ -348,6 +348,7 @@ Public Sub Lancement()
   Signal[Signal.SIGINT].Catch
   
   While (Not Start.Exit)
+    Print "wait 60"
     Wait 60
   Wend
   

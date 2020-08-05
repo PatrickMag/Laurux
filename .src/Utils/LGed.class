@@ -335,7 +335,7 @@ Public Sub Existant_Click()
   Dim Req As String
   Dim Res As Result
   
-  Req = "select * from Fiches_Tag"
+  Req = "select * from Fiches_Tag LIMIT 1"
   Res = Utils.db.Exec(Req)
   If Not Res.Available Then Return
   

@@ -267,7 +267,8 @@ Public Sub Filter_GotFocus()
   If Last.Tag = Last.Text Then
     Last.Text = ""
   Endif
-  Update()
+'  Update()
+  Print "gotfocus", Last.tag
 
 End
 
@@ -276,7 +277,8 @@ Public Sub Filter_LostFocus()
   If Last.Text = "" Then
     Last.Text = Last.Tag  
   Endif
-  Update()
+'  Update()
+  Print "lostfocus", Last.Tag
 
 End
 
@@ -523,7 +525,7 @@ Public Sub GetAllFiltered() As Result
   If Extra_have <> Null And Having <> Null Then
     have_comb = Extra_havecomb
   Endif
-  
+  Print "requete all filter"
   Return Utils.db.Exec(Request & where & Extra_sel & " " & sel_comb & " " & Sel & " " & Group & " " & has & Extra_have & " " & have_comb & " " & Having & " order by " & Tri)
   
 End
@@ -567,12 +569,12 @@ Public Sub DB_Incr()
   If Extra_have <> Null And Having <> Null Then
     have_comb = Extra_havecomb
   Endif
-
+Print "requete db_incr"
   Res = Utils.db.Exec(Request & where & Extra_sel & " " & sel_comb & " " & Sel & " " & Group & " " & has & Extra_have & " " & have_comb & " " & Having & " order by " & Tri & " limit " & NbEnreg & ", " & lg & "")
   If Res.Available Then
-    If Res.count <> 0 Then
-        Coltri.rows.Count = Res.count
-    End If
+    Coltri.rows.Count = Res.count
+  Else
+    Coltri.rows.Count = 0
   End If
   Coltri.Refresh
 
@@ -589,12 +591,12 @@ Public Sub DB_Decr()
   If Extra_have <> Null And Having <> Null Then
     have_comb = Extra_havecomb
   Endif
-
+Print "requete db_decr"
   Res = Utils.db.Exec(Request & where & Extra_sel & " " & sel_comb & " " & Sel & " " & Group & " " & has & Extra_have & " " & have_comb & " " & Having & " order by " & Tri & " desc limit " & NbEnreg & ", " & lg & "")
   If Res.Available Then
-    If Res.count <> 0 Then
-        Coltri.rows.Count = Res.count
-    End If
+    Coltri.rows.Count = Res.count
+  Else
+    Coltri.rows.Count = 0
   End If
   Coltri.Refresh
 
