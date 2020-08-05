@@ -626,13 +626,13 @@ Public Sub affichage()
         If Ctrl.Value = False Or detail.Value = True Then
  '         If dt.Apres(dte2) and Then
 '          If .Cdate_Comp(rResult!dte) >= .Cdate_dbase(dten0.Text) And .Cdate_Comp(rResult!dte) <= .Cdate_dbase(dten1.Text) Then
-            pResult = Utils.db.Exec("SELECT * FROM " & Tabp & " WHERE code = &1", rResult!numero)
+'            pResult = Utils.db.Exec("SELECT Docs_Ged.lind AS lind FROM Fiches_Tag,Docs_Tag,Docs_Ged WHERE tag=&1 AND tag_lind=Fiches_Tag.lind AND doc_lind=Docs_Ged.lind", rResult!numero)
             Colcli.Add(rResult.Index, rResult.Index)
-            If presult.Available Then
-              Colcli.Item[0] = "* " & rResult!compte
-            Else
+'            If presult.Available Then
+'              Colcli.Item[0] = "* " & rResult!compte
+ '           Else
               Colcli.Item[0] = "  " & rResult!compte
-            Endif
+ '           Endif
             Colcli.Item[1] = dt.L
             Colcli.Item[2] = rResult!libelle
             Colcli.Item[3] = rResult!numdoc
@@ -1103,20 +1103,17 @@ Public Sub Tlettree_MouseDown()
 
 End
 
-Public Sub Colcli_Click()
+Public Sub Colcli_MouseUp()
 
   Dim rDoc As Result
+  Dim lg As LGed
 
-  If Me.mouse = Mouse.Right Then
-    rDoc = Utils.db.Exec("SELECT * FROM " & Cbase.Table("TabCPTdocs") & " where doc2 like \"%" & Colcli.Item[7] & "%\" and doc2 like \"%" & Replace$(Colcli.Item[0], "* ", "") & "%\"")
-    If Not rDoc.Available Then rDoc = Utils.db.Exec("SELECT * FROM " & Cbase.Table("TabCPTdocs") & " where doc2 like \"%" & Colcli.Item[7] & "%\"")
+  If Mouse.Right Then
+    rDoc = utils.db.Exec("SELECT Docs_Ged.lind AS lind FROM Fiches_Tag,Docs_Tag,Docs_Ged WHERE tag=&1 AND tag_lind=Fiches_Tag.lind AND doc_lind=Docs_Ged.lind", Colcli.Current[7])
     If rDoc.Available Then
-      Repeat
-        Desktop.Open(rDoc!doc)
-      Until rDoc.MoveNext()
+      lg = New LGed(Null, rDoc!lind, LGed.Comptabilite)
+      lg.Ouvrir()
     Endif
-  Else
-'    Colcli.Sorted = True
   Endif
 
 End

@@ -670,7 +670,7 @@ Public Function editefm(Optional courriel As Boolean = False) As Boolean        
       Endif
       sText = "Facture n° : " & Me.numfac & " du " & Me.dtedoc.L
       EnvMail.Envoi(Me.rescli!cli_email, sText, sText2, True, User.Home & "/tmp/", "application/pdf", "Facture.pdf")
-      Me.dupli2()
+      'Me.dupli2()
     Else
       Me.imp.NumCopies = Me.nbexplemplaire
       If Me.imp.NumCopies > 0 Then

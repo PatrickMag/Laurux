@@ -5574,7 +5574,7 @@ end_utf8:
       r2Result = Utils.db.Exec("SELECT lind FROM Docs_Ged WHERE lind = LAST_INSERT_ID()")
       For Each txt In Split(rResult!doc2, ",")
         If IsNull(txt) Then Continue
-        rReq = Utils.db.Exec("Select * From Fiches_Tag where tag = &1", txt)
+        rReq = Utils.db.Exec("Select * From Fiches_Tag where tag = &1 and lind=&2", txt, r2Result!lind)
         If rReq.Available Then
           Try Utils.db.Exec("INSERT INTO Docs_Tag (doc_lind, tag_lind) values (&1,&2)", r2Result!lind, rReq!lind)
         Else

@@ -868,6 +868,9 @@ Public Sub Dupli2()
 
   Dim chemin, ty As String 
   Dim res As Result
+  Dim filename As String
+  Dim path_url As String
+  Dim LastInsertId As Long
   
   imp.NumCopies = 1
   imp.OutputFile = User.Home & "/tmp/Facture.pdf"
@@ -883,13 +886,24 @@ Public Sub Dupli2()
     If Not pdfannu Then
       Chemin &= "/" & Format(Month($dteech.G), "00")
       If Not Exist(chemin) Then Try Mkdir chemin
-      imp.OutputFile = chemin & "/" & ty & ".pdf"
-      imp.NumCopies = 1
-      edit.Print(imp)
-      res = Utils.db.Exec("SELECT * FROM Docs_Clients WHERE code=&1 AND doc=&2", $numcli, chemin & "/" & ty & ".pdf")
-      If Not res.Available Then Utils.db.Exec("insert into " & Cbase.Table("TabCdocs") & " (code,doc, doc2, org) values ( &1,&2, &3, &4)", $numcli, chemin & "/" & ty & ".pdf", $numcli & "," & ty & ",", "Facs")
-      If choix = ObjFac.facture Or choix = ObjFac.finmois Then copie.Dupli2CPT(numeroecr, chemin, $numcli, ty)
     Endif
+    imp.OutputFile = chemin & "/" & ty & ".pdf"
+    imp.NumCopies = 1
+    edit.Print(imp)
+    filename = File.Name(chemin & "/" & ty & ".pdf")
+    path_url = "file://" & chemin & "/" & ty & ".pdf"
+    utils.db.Begin
+    LastInsertId = InsDoc(filename, path_url, LGed.Clients)
+    If choix = ObjFac.facture Or choix = ObjFac.finmois Then
+      InsTag(LastInsertId, [$numcli, $numfac])
+    Else
+      InsTag(LastInsertId, [$numcli, $numbl])
+    Endif
+    If choix = ObjFac.facture Or choix = ObjFac.finmois Then
+      LastInsertId = InsDoc(filename, path_url, LGed.Comptabilite)
+      InsTag(LastInsertId, [Str(numeroecr)])
+    Endif
+    utils.db.Commit
   Else
       chemin = User.Home & "/Impressions"
       imp.OutputFile = chemin & "/" & ty & ".pdf"
@@ -897,6 +911,54 @@ Public Sub Dupli2()
       edit.Print(imp)
   Endif
     
+End
+
+Private Sub InsDoc(filename As String, path_url As String, type As Integer) As Long
+  
+  Dim res As Result
+  Dim LastInsertId As Long
+  
+  res = Utils.db.Edit("Docs_Ged", "code=&1 AND filename=&2 AND type=&3", $numcli, filename, type)
+  If Not res.Available Then 
+    res = utils.db.Create("Docs_Ged")
+    res!type = type
+    res!code = $numcli
+    res!origin = "Facs"
+    res!url = path_url
+    res!filename = filename
+    res!mime = "application/pdf"
+  Else
+    LastInsertId = res!lind
+  Endif
+  res!date = $dtedoc.G
+  res!ttc = montttc
+  res!ht = montht
+  res.Update
+  If LastInsertId = 0 Then LastInsertId = utils.db.LastInsertId
+  Return LastInsertId
+  
+End
+
+Private Sub InsTag(LastInsertId As Long, tag As String[])
+  
+  Dim txt As String
+  Dim rReq, res As Result
+  Dim LastInsertId_tag As Long
+  
+  For Each txt In tag
+    If IsNull(txt) Or txt = "0" Then Continue
+    rReq = Utils.db.Exec("Select * From Fiches_Tag where tag = &1", txt)
+    If rReq.Available Then
+      Try Utils.db.Exec("INSERT INTO Docs_Tag (doc_lind, tag_lind) values (&1,&2)", LastInsertId, rReq!lind)
+    Else
+      res = utils.db.Create("Fiches_Tag")
+      res!tag = txt
+      res.Update
+      LastInsertId_tag = utils.db.LastInsertId
+      Utils.db.Exec("INSERT INTO Docs_Tag (doc_lind, tag_lind) values (&1,&2)", LastInsertId, LastInsertId_tag)
+    Endif
+  Next
+  
 End
 
 Private Function nom() As String
@@ -946,6 +1008,7 @@ Public Function ecriturecompt() As Boolean
   ecr = New EcrAuto("", lignecom)
   If ecr.ecriture() Then Return True
   $numfac = ecr.numfac
+  numeroecr = ecr.numecr
   If choix = ObjFac.facture Then
     rescomp = utils.db.Edit("Fiches_Bl", "numbl=&1", $numbl)
     rescomp!numfac = ecr.numfac
