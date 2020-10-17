@@ -1,0 +1,117 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,162,92)
+  Text = ("Entée des articles")
+  { TabStrip1 TabStrip
+    MoveScaled(1,18,160,73)
+    Count = 2
+    Index = 0
+    Text = ("Saisie")
+    Picture = Picture["Icones/Achat.png"]
+    { Panel2 Panel
+      MoveScaled(0,0,160,69)
+      Arrangement = Arrange.Vertical
+      { Panel3 Panel
+        MoveScaled(20,4,41,18)
+        Visible = False
+        Ignore = True
+      }
+    }
+    Index = 1
+    Text = ("Tarifs")
+    Picture = Picture["Icones/Remises.png"]
+    { Ptarif Panel
+      MoveScaled(0,0,160,69)
+      Expand = True
+      Arrangement = Arrange.Horizontal
+    }
+    Index = 0
+  }
+  { Panel1 Panel
+    MoveScaled(2,1,128,17)
+    { fcode TextReg
+      MoveScaled(14,1,16,3)
+    }
+    { RecFo Button
+      MoveScaled(31,1,5,3)
+      Picture = Picture["Icones/next_frame.png"]
+    }
+    { Label1 Label
+      MoveScaled(0,1,13,3)
+      Text = ("Fournisseur :")
+    }
+    { fo_nom Label
+      MoveScaled(38,1,35,3)
+      Border = Border.Plain
+    }
+    { Label3 Label
+      MoveScaled(74,1,15,3)
+      Text = ("N° commande : ")
+    }
+    { ncom TextReg
+      MoveScaled(89,1,25,3)
+    }
+    { Label4 Label
+      MoveScaled(78,5,16,3)
+      Text = ("N° BL :")
+    }
+    { nbl TextReg
+      MoveScaled(93,5,25,3)
+    }
+    { creation Button
+      MoveScaled(2,13,24,4)
+      Text = Shortcut(("Création Commande"), "C")
+      Picture = Picture["icon:/medium/add"]
+    }
+    { imprime Button
+      MoveScaled(31,13,13,4)
+      Text = Shortcut(("Imprimer"), "I")
+      Picture = Picture["Icones/frameprint.png"]
+    }
+    { mail Button
+      MoveScaled(45,13,13,4)
+      Text = Shortcut(("Mail"), "M")
+      Picture = Picture["Icones/mail_forward.png"]
+    }
+    { suppr Button
+      MoveScaled(60,13,13,4)
+      Text = Shortcut(("Supprimer"), "S")
+      Picture = Picture["Icones/stock_trash_24.png"]
+    }
+    { ValideS Button
+      MoveScaled(74,13,18,4)
+      Text = Shortcut(("Valider la saisie"), "V")
+      Picture = Picture["Icones/filesave.png"]
+    }
+    { sortie Button
+      MoveScaled(116,13,12,4)
+      Text = ("Quitter")
+      Picture = Picture["Icones/exit.png"]
+    }
+    { crecom Button
+      MoveScaled(115,1,13,3)
+      Text = ("Créer")
+      Picture = Picture["Icones/folder_new.png"]
+    }
+    { Label6 Label
+      MoveScaled(0,6,14,3)
+      Text = ("Commentaire")
+    }
+    { com TextArea
+      MoveScaled(14,5,63,6)
+    }
+    { rececp Button
+      MoveScaled(95,13,14,4)
+      Text = ("Reception")
+      Picture = Picture["Icones/next.png"]
+    }
+    { dte TextReg
+      MoveScaled(100,9,17,3)
+    }
+    { Label2 Label
+      MoveScaled(85,9,15,3)
+      Text = ("Date :")
+    }
+  }
+}

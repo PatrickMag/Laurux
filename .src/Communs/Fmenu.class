@@ -1026,7 +1026,7 @@ Public Sub Menu88_Click()
     Endif
   Endif
 
-  Commande.showModal()
+  Commande1.show()
 
 End
 

@@ -1,0 +1,452 @@
+' Gambas class file
+
+Create Static
+
+Private $tim As Timer
+Private $opt As String
+Private $req As String
+Private $table As Variant[]
+Private $optart As Artopt
+Private $win As Window
+Private $panel As Panel
+Private tr As TriGen
+Private Col As Collection
+Private Obj As Object
+Private $etat As Integer
+Private $prop As New ObjProp[]
+Private $PxRec As Boolean
+
+Public Bsel As Boolean = False
+Public Bval As Variant = Null
+Public tbl As Achat
+
+
+Public Sub _new()
+
+  Dim res As Result
+  Dim obj As ObjProp
+  Dim w As Integer
+  Dim t1 As Integer = Me.Font.Size * 8
+  Dim t2 As Integer = Me.Font.Size * 2
+  Dim t3 As Integer = Me.Font.Size * 5
+  Dim t4 As Integer = Me.Font.Size * 12
+  Dim ch As Chainage
+  
+  dte.Dat = True
+  $opt = Utils.Option()
+  If $opt <> "N" Then
+    TabStrip1.Count += 1
+    TabStrip1.Text = "Options"
+    TabStrip1.Picture = Picture["Icones/Saisiefacture.png"]
+  Endif
+  $PxRec = Start.LocalSettings["/Soc" & Start.Societe & "/prixRecpt"] 
+  
+  res = Utils.db.Exec("SELECT * FROM Fiches_Art, Fiches_Tvaav  WHERE art_tva=code_tva LIMIT 1")
+  w = Panel2.w - (3 * t1) - t2 - (4 * t4) - 5
+  If $opt = "B" Or $opt = "T" Then w -= (2 * t3)
+  If Not Start.LocalSettings["/Soc" & Start.Societe & "/prixRecpt"] Then w += (3 * T4) + (2 * t1)
+  obj = New ObjProp(res.Fields["art_code"], "Code")
+  obj.AddChamp("MaxLenght", 15)
+  obj.Height = Me.Font.H + 4
+  obj.Width = t4
+  obj.AddChamp("recherche", True)
+  obj.AddChamp("conteneur", Panel3)
+  obj.AddChamp("champ", ["Fiches_Art", "art_code", "art_design"])
+  
+  obj.AddChamp("lke", TextReg.commence_par)
+  $prop.Add(obj)
+  
+  obj = New ObjProp(Null, "Rech", ObjProp.Button)
+  obj.Height = Me.Font.H + 4
+  obj.Width = t2
+  obj.AddChamp("Picture", Picture["Icones/next_frame.png"])
+  $prop.Add(obj)
+  
+  obj = New ObjProp(res.Fields["art_design"], "Désignation")
+   obj.Height = Me.Font.H + 4
+   obj.Width = w
+'  obj.AddChamp("Expand", True)
+  $prop.Add(obj)
+  
+  If $opt = "B" Or $opt = "T" Then
+    obj = New ObjProp(res.Fields["art_nbcol"], "Pal")
+    obj.Height = Me.Font.H + 4
+    obj.Width = t3
+    obj.AddChamp("numerique", True)
+    obj.AddChamp("nbdec", "0")
+    obj.AddChamp("Alignment", Align.Center)
+    $prop.Add(obj)
+    
+    obj = New ObjProp(res.Fields["art_nbbou"], "Col")
+    obj.Height = Me.Font.H + 4
+    obj.Width = t3
+    obj.AddChamp("numerique", True)
+    obj.AddChamp("nbdec", "0")
+    obj.AddChamp("Alignment", Align.Center)
+    $prop.Add(obj)
+  Endif
+  
+  obj = New ObjProp(Null, "Qte")
+  obj.Height = Me.Font.H + 4
+  obj.Width = t1
+  obj.AddChamp("numerique", True)
+  obj.AddChamp("Value", 1)
+  obj.AddChamp("Alignment", Align.Right)
+  $prop.Add(obj)
+  
+  obj = New ObjProp(res.Fields["art_paht"], "Px_Brut")
+  obj.Height = Me.Font.H + 4
+  obj.Width = t4
+  obj.AddChamp("numerique", True)
+  obj.AddChamp("Alignment", Align.Right)
+  If $PxRec Then obj.AddChamp("Visible", False)
+  $prop.Add(obj)
+  
+  obj = New ObjProp(Null, "Rem")
+  obj.Height = Me.Font.H + 4
+  obj.Width = t1
+  obj.AddChamp("reg", "-?[0-9]*[,.]?[0-9]{0,2}[%]{0,1}")
+  obj.AddChamp("Alignment", Align.Right)
+  If $PxRec Then obj.AddChamp("Visible", False)
+  $prop.Add(obj)
+  
+  obj = New ObjProp(res.Fields["art_paht"], "Px_Net")
+  obj.Height = Me.Font.H + 4
+  obj.Width = t4
+  obj.AddChamp("numerique", True)
+  obj.AddChamp("Alignment", Align.Right)
+  If $PxRec Then obj.AddChamp("Visible", False)
+  $prop.Add(obj)
+  
+  obj = New ObjProp(res.Fields["art_frais"], "Frais")
+  obj.Height = Me.Font.H + 4
+  obj.Width = t1
+  obj.AddChamp("numerique", True)
+  obj.AddChamp("nbdec", "2")
+  obj.AddChamp("Alignment", Align.Right)
+  If $PxRec Then obj.AddChamp("Visible", False)
+  $prop.Add(obj)
+  
+  obj = New ObjProp(res.Fields["art_prvt"], "Px_Rev")
+  obj.Height = Me.Font.H + 4
+  obj.Width = t4
+  obj.AddChamp("numerique", True)
+  obj.AddChamp("Alignment", Align.Right)
+  If $PxRec Then obj.AddChamp("Visible", False)
+  $prop.Add(obj)
+  
+  ch = New Chainage([fcode, ncom, com])
+  fcode.SetFocus
+  
+End
+
+Public Sub Form_Open()
+  
+  Dim rd As RadioButton
+  
+  tbl = New Achat($prop, Panel2) As "Achat"
+  tbl.VisibleChoi = False
+  tbl.show
+  TabStrip1.Index = 0
+  
+  $win = New Window As "Window"
+  $win.Arrangement = Arrange.Vertical
+  $panel = New Panel($win) As "panel"
+  $panel.Arrangement = Arrange.Horizontal
+  $panel.h = 27
+  $panel.Width = Me.Width + 40
+  rd = New RadioButton($panel) As "commande"
+  rd.Text = "Liste des commandes"
+  rd.Expand = True
+  rd = New RadioButton($panel) As "valide"
+  rd.Text = "Liste des commandes validées"
+  rd.Expand = True
+  rd = New RadioButton($panel) As "reception"
+  rd.Text = "Liste des commandes réceptionnées"
+  rd.Expand = True
+  $etat = Achat.Reception
+  $panel = New Panel($win)
+  $win.Text = "Sélection des entrées"
+  $win.Width = Me.Width + 50
+  $win.Height = Me.Height - 100
+  $win.Center
+  $panel.Width = $win.Width - 10
+  $panel.Height = $win.Height - 30
+  $panel.X = 0
+  $panel.y = 0
+  $win.X = 0
+  $win.Y = 0
+  $win.Show
+  rd.Value = True
+  $tim = New Timer As "Tim"
+  $Tim.Delay = 10000
+  $Tim.Start
+  
+  
+End
+
+Public Sub Achat_Ajou(Value As Sailig)
+
+  Dim gt As GesTar
+  Dim opt As Artopt
+  
+'  Try Value.AutresObj[Achat.Tarif].hide
+  gt = New GesTar(Ptarif, Value)
+  Value.AutresObj = New Object[Achat.ObjFin]
+  Value.AutresObj[Achat.Tarif] = gt
+  Value.AutresObj[Achat.Frais] = opt
+
+End
+
+Public Sub form_Close()
+
+  $win.Close
+
+End
+
+Public Sub Window_Close()
+
+  Me.Close
+
+End
+
+Public Sub Tim_Timer()
+
+  tr.Update
+
+End
+'***************Table de choix des commandes
+Public Sub Update_Req()
+
+  Dim k As String
+  Dim Res As Result
+  Dim prop As ObjProp
+  
+  Col = New Collection
+   
+  Res = Utils.db.Exec($req & " LIMIT 1")
+
+  k = "--Code--"
+  prop = New ObjProp(Res.Fields["four"], k)
+  prop.cle = True
+  Col.Add(prop, k)
+  k = "------------------- Nom ---------------------"
+  prop = New ObjProp(Res.Fields["fo_nom"], k)
+  prop.tri = True
+  Col.Add(prop, k)
+  k = "--Numéro--"
+  prop = New ObjProp(Res.Fields["numrecpt"], k)
+  prop.cle = True
+  Col.Add(prop, k)
+  k = "-------- Date -----------"
+  prop = New ObjProp(Res.Fields["ddate"], k)
+  prop.AddChamp("Alignment", Align.Center, "dd.mm.yyyy")
+  Col.Add(prop, k)
+  k = "------ H.T ----------"
+  prop = New ObjProp(Res.Fields["montant"], k)
+  prop.AddChamp("Alignment", Align.Right, "0.00")
+  Col.Add(prop, k)
+  k = "------- T.T.C ---------"
+  prop = New ObjProp(Res.Fields["mttc"], k)
+  prop.AddChamp("Alignment", Align.Right, "0.00")
+  Col.Add(prop, k)
+  k = "------------------------- Commentaire ------------------------------"
+  prop = New ObjProp(Res.Fields["commentaire"], k)
+  Col.Add(prop, k)
+  
+  tr = New TriGen($Panel, Col, Res, $req, 20, Me) As "ColTri"
+  
+End
+
+Public Sub ColTri_KeyPress()
+
+  If Key.Code = Key.Esc Then Stop Event
+
+End
+
+Public Sub ColTri_MajSel(val As Variant)
+  
+  Dim cond As String
+  Dim col As String
+  
+  Stop Event
+  If Not bsel And IsNull(val) Then Return
+  
+  If Bsel = True Then
+    If Val Then
+      For Each col In val
+        cond &= Utils.db.Subst(val.Key & " = &1", col) & " AND "
+        If val.Key Match "four" Then FourMan(col)
+      Next
+      cond = Left(cond, -4)
+      tbl.LitCommande(cond, $etat, TabStrip1)
+      com.Text = tbl.commentaire
+      If $etat = Achat.EnCommande Then ncom.Text = tbl.numero Else nbl.Text = tbl.numero
+      dte.Text = LDate(Now).G
+    Endif
+  Endif
+
+End
+
+'**************radio buttons*****************************
+Public Sub commande_click()
+
+  $req = " SELECT four, numcom as numrecpt, ddate,montant, montantttc AS mttc,anomalie,commentaire,fo_nom FROM Fiches_Entcom JOIN Fiches_Four on four=fo_code"
+  $etat = Achat.EnCommande
+  Update_Req
+
+End
+
+Public Sub reception_click()
+
+  $req = "SELECT  four,numrecpt, ddate,montant, mttc,anomalie,commentaire,fo_nom FROM Fiches_Entrecpt JOIN Fiches_Four on four=fo_code "
+  $etat = Achat.Reception
+  Update_Req
+  tr.ExtraSel("validee= False ", "AND")
+
+End
+
+Public Sub Valide_click()
+
+  $req = "SELECT four, numrecpt, ddate,montant, mttc,anomalie,commentaire,fo_nom FROM Fiches_Entrecpt JOIN Fiches_Four on four=fo_code "
+  $etat = Achat.Validee
+  Update_Req
+  tr.ExtraSel("validee= True ", "AND")
+
+End
+
+Private Sub FourMan(four As String)      ''Récupere les info sur le fournisseur sélectionné
+  
+  Dim res As Result
+  
+  res = Utils.db.Exec("SELECT * FROM Fiches_Four WHERE fo_code = &1", four)
+  If res.Available Then
+    fcode.Text = four
+    fo_nom.Text = res!fo_nom
+  Endif
+End
+
+'***********Gestion des boutons
+
+Public Sub creation_Click()
+
+  Dim obj As Object
+  
+  If Not IsNull(tbl) Then
+    If tbl.ligne.Count > 0 Then
+      Message.Info("Vous avez une saisie en cours, création impossible")
+      Return
+    Endif
+  Endif
+  For Each obj In Panel2.Children
+    If obj.name = "Panel3" Then Continue
+    Try obj.delete
+  Next
+  
+  tbl = New Achat($prop, Panel2) As "Achat"
+  tbl.VisibleChoi = False
+  tbl.show
+  tbl.ajout
+  $etat = Achat.EnCommande
+  Panel3.Raise
+
+End
+
+Public Sub imprime_Click()
+
+  
+
+End
+
+Public Sub mail_Click()
+
+  
+
+End
+
+Public Sub suppr_Click()
+
+  
+
+End
+
+Public Sub ValideS_Click()
+
+  Dim obj As Object
+  Dim lg As Sailig
+  Dim res As Result
+  Dim i As Integer
+  Dim num As String
+  
+  If $etat = Achat.EnCommande Or $etat = Achat.Reception Then
+    For Each lg In tbl
+      For i = 0 To Achat.ObjFin
+        If Not IsNull(lg.AutresObj[i]) Then
+          If nbl.Text Then num = nbl.Text Else num = ncom.Text
+          Utils.db.Begin
+          res = Utils.db.Edit("Fiches_TarBlod", "four=&1 AND num=&2 AND date=&3", fcode.Text, num, dte)
+          If Not res.Available Then
+            res = Utils.db.Create("Fiches_TarBlod")
+            res!four = fcode.Text
+            res!num = num
+            res!dte = dte.dte
+          Endif
+          res!AutresObj = lg.AutresObj[i]
+        Endif
+      Next
+    Next
+  Endif
+
+End
+
+Public Sub rececp_Click()
+
+  
+
+End
+
+Public Sub sortie_Click()
+
+  Me.Close
+
+End
+
+Public Sub crecom_Click()
+
+  
+
+End
+
+Public Sub RecFo_Click()
+
+  Dim MyForm As TriCpt
+
+  MyForm = New TriCpt(TriCpt.Fournisseur, TriCpt.Sans_Solde, Me)
+  MyForm.Showmodal()
+  If Bsel = True Then
+    fcode.Text = Bval
+    FourMan(Bval)
+    ncom.setfocus
+  Endif
+
+End
+
+Public Sub Achat_gotfocus(Value As Sailig)
+
+  If Value.MonControle["Code"].hasfocus Then 
+    Panel3.Y = tbl.Tableau.Y + Value.Y 
+    Panel3.X = Value.MonControle["Code"].W + Value.MonControle["Rech"].W
+    Panel3.Visible = True
+  Else
+    Panel3.Visible = False
+  Endif
+
+End
+
+Public Sub Achat_lostfocus(Value As Sailig)
+
+  If Last = Value.MonControle["Code"] Then Value.MonControle["Désignation"].setfocus
+
+End
+
+

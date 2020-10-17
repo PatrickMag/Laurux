@@ -1,0 +1,338 @@
+' Gambas class file
+
+Create Static
+
+Inherits SaiTableau
+
+Public Struct boisson
+  NbCol As Integer
+  NbUnit As Integer
+End Struct
+
+Public commentaire As String
+Public numero As String
+Public fdc As Fourconsdroi
+Public OptAr As Artopt
+
+Public Bsel As Boolean = False
+Public Bval As String
+
+Private $code As String
+
+Property Read TotTtc As LPrix
+
+Event ajou(Value As Sailig)
+Event ChangeText(Value As Sailig)
+
+Public Enum EnCommande, Reception, Validee
+Public Enum Consigne, Tarif, Frais, ObjFin
+ 
+'*****************Gestion des focus et calcul de chaque ligne de saisie***********************
+Public Sub ligne_LecCode(ligne As Variant)
+  
+  Dim res As Result
+  Dim obj As ObjProp
+  Dim reg As Object
+  Dim cs As New Boisson
+  Dim code As String
+  
+  If TypeOf(code) = gb.String Then
+    code = ligne
+    ligne = Me.ligne[Me.ind]
+  Else
+    code = ligne.MonControle["Code"].text
+  Endif
+  res = Utils.db.Exec("SELECT * FROM Fiches_Art, Fiches_Tvaav  WHERE art_tva=code_tva AND art_code=&1", code)
+  If res.Available Then
+   For Each obj In Me.$prop
+     If Not IsNull(obj.name) Then
+       reg = Me.ligne[Me.ind].MonControle[obj.NomControl]
+       reg.Text = res[obj.name]
+       If obj.NomControl <> "Code" Then
+         If obj.NomControl = "Qte" Then reg.nbdec = res!art_dec Else reg.nbdec = res!art_nbd
+         If obj.NomControl = "Col" Or obj.NomControl = "Pal" Then 
+           reg.nbdec = "0"
+           reg.Value = 0
+           Me.ligne[Me.ind].AutresObj[consigne].NbCol = res!art_nbcol
+           Me.ligne[Me.ind].AutresObj[consigne].NbUnit = res!art_nbbou
+         Endif
+       Endif
+     Endif
+   Next
+   Try Me.ligne[Me.ind].prx = New LPrix(Me.ligne[Me.ind].MonControle["Px_Net"].Value, 1, LPrix.Arr_0001) As "Lprix"
+   Me.ligne[Me.ind].valide = False
+   Me.ligne[Me.ind].arrondi = res!art_cdarr
+  Else
+     Message.Error("Aricle innexitant")
+     Me.ligne[Me.ind].valide = True
+     Stop Event
+  Endif
+  
+End
+
+Public Sub Code_gotfocus()
+
+  Me.ligne[Me.ind].valide = True
+  $code = Me.ligne[Me.ind].MonControle["Code"].Text
+
+End
+
+Public Sub Code_lostfocus()
+
+  If Last.Text <> $code Then
+    If Last.text Then ligne_LecCode(Last.Text)
+    Me.ligne[Me.ind].AutresObj[Tarif].LecArt = Me.ligne[Me.ind]
+    
+  Endif
+  Raise lostfocus(Me.ligne[Me.ind])
+  
+End
+
+Public Sub Rech_click()
+
+   Dim MyForm As TriArticles
+
+  MyForm = New TriArticles(True, False, "art_code", "", "", Null, False, False, Me)
+  MyForm.Showmodal()
+  If Bsel = True Then
+    Me.ligne[Me.ind].MonControle["Code"].Text = Bval
+     If Bval <> $code Then
+       If Bval Then ligne_LecCode(Bval)
+       Me.ligne[Me.ind].AutresObj[Tarif].LecArt = Me.ligne[Me.ind]
+    Endif
+    ligne_LecCode(Bval)
+    Me.ligne[Me.ind].MonControle["Désignation"].setfocus
+  Endif
+
+End
+
+Public Sub qte_lostfocus()
+  
+  If Me.ligne[Me.ind].valide Then Return
+  Try Me.ligne[Me.ind].prx.Qte = Last.Value
+  calcul
+  
+End
+
+
+Public Sub Pal_gotfocus()
+
+  If Me.ligne[Me.ind].valide Then Return
+  If Me.ligne[Me.ind].AutresObj[consigne].NbCol = 0 Then Me.ligne[Me.ind].MonControle["Col"].setfocus
+
+End
+
+Public Sub Pal_lostfocus()
+
+  If Me.ligne[Me.ind].valide Then Return
+  If Me.ligne[Me.ind].AutresObj[consigne].NbCol <> 0 And Me.ligne[Me.ind].MonControle["Col"].Value = 0 Then Me.ligne[Me.ind].MonControle["Col"].Value = Me.ligne[Me.ind].AutresObj[consigne].NbCol * Me.ligne[Me.ind].MonControle["Pal"].Value
+
+End
+
+Public Sub Col_gotfocus()
+
+  If Me.ligne[Me.ind].valide Then Return
+  If Me.ligne[Me.ind].AutresObj[consigne].NbUnit = 0 Then Me.ligne[Me.ind].MonControle["Qte"].setfocus
+
+End
+
+Public Sub Col_lostfocus()
+
+  If Me.ligne[Me.ind].valide Then Return
+  If Me.ligne[Me.ind].AutresObj[consigne].NbUnit <> 0 And Me.ligne[Me.ind].MonControle["Qte"].Value = 1 Then Me.ligne[Me.ind].MonControle["Qte"].Value = Me.ligne[Me.ind].AutresObj[consigne].NbUnit * Me.ligne[Me.ind].MonControle["Col"].Value
+
+End
+
+Public Sub rem_lostfocus()
+
+  If Me.ligne[Me.ind].valide Then Return
+  calcul
+
+End
+
+Public Sub Px_Net_lostfocus()
+
+  If Me.ligne[Me.ind].valide Then Return
+'  If Me.opt = "T" Or Me.opt = "B" Then
+'    OptAr.prixachat = Me.ligne[Me.ind].pnet.Text
+'  Endif
+  calcul
+
+End
+
+Public Sub frais_lostfocus()
+
+  If Me.ligne[Me.ind].valide Then Return
+  calcul
+
+End
+
+Public Sub Px_Brut_lostfocus()
+
+  If Me.ligne[Me.ind].valide Then Return
+  If Me.ligne[Me.ind].MonControle["Px_Brut"].Value <> Me.ligne[Me.ind].prx.PuBHT.G Then
+    Me.ligne[Me.ind].prx = New LPrix(Me.ligne[Me.ind].MonControle["Px_Brut"].Value, Me.ligne[Me.ind].MonControle["Qte"].Value, Me.ligne[Me.ind].arrondi) As "Lprix"
+  Endif
+  calcul
+
+End
+
+Public Sub Lprix_change(Data As LPrix)
+
+  Dim sl As SaiLig
+  
+  Me.ligne[Me.ind].MonControle["Px_Brut"].Value = Data.PuBHT.G
+  Me.ligne[Me.ind].MonControle["Px_Net"].Value = Data.PuNHT.G
+  Me.ligne[Me.ind].MonControle["Px_Rev"].Value = Data.PuNTC.G
+  Me.ligne[Me.ind].AutresObj[Tarif].PxRev = Data.PuNTC.G
+'  Me.ligne[Me.ind].AutresObj[Tarif].
+'  Me.total.TotHt.Value = 0
+'  For Each sl In Me
+'     Me.total.TotHt.Value += sl.TotHt.Value
+'  Next
+
+End
+
+Private Sub calcul()
+  
+  Dim tx As LTaxe
+  Dim txt As String
+  
+  txt = Me.ligne[Me.ind].MonControle["Rem"].Text
+  If txt Then
+    If txt Match "%" Then txt = Replace(txt, "%", "")
+    If Val(txt) <> 0 Then
+      tx = New LTaxe(Me.ligne[Me.ind].MonControle["Rem"].Text, LTaxe.Remise)
+      Me.ligne[Me.ind].prx.add_taxe(tx)
+    Endif
+  Endif
+  If IsNull(Me.ligne[Me.ind].MonControle["Frais"].Text) Then Me.ligne[Me.ind].MonControle["Frais"].Value = 0
+  tx = New LTaxe(Me.ligne[Me.ind].MonControle["Frais"].Text, LTaxe.Frais)
+  Me.ligne[Me.ind].prx.add_taxe(tx)
+  
+End
+
+Public Sub ligne_RetLigne(etat As Integer)
+  
+  If Me.ind = Me.ligne.Max Then 
+    If etat = SaiLig.ecriture And Not (Me.ligne[Me.ind].MonControle["Code"].HasFocus) Then ajout()
+  Else
+'    Me.ligne[Me.ind].AutresObj[Tarif].hide
+'    Me.ligne[Me.ind].AutresObj[SaiLig.Frais].hide
+    Me.ligne[Me.ind + 1].MonControle[Me.$prop[0].NomControl].SetFocus
+    Me.ind += 1
+'     Me.ligne[Me.ind].AutresObj[Tarif].visible = True
+  Endif
+  Stop Event
+  
+End
+
+Public Sub ligne_InsLig(etat As Integer)
+
+  Dim cs As New Boisson
+  
+  If etat = SaiLig.ecriture And Me.ligne[Me.ind].MonControle[Me.ligne[Me.ind].MonControle.Last].Tag = True Then
+    Super.ligne_InsLig(etat)
+    Raise ajou(Me.ligne[Me.ind])
+    Try Me.ligne[Me.ind].AutresObj[Consigne] = cs
+    Me.ligne[Me.ind].chain.tableaux.Extract(1)
+  Endif
+
+End
+
+Public Sub ligne_ctrl(Value As Integer)
+
+'  If Chr(Value) = "c" Or Chr(Value) = "C" Then
+    
+'  Endif
+
+End
+
+Public Sub ajout(Optional etat As Integer = SaiLig.ecriture)
+  
+  Dim cs As New Boisson
+ 
+  Super.ajout(etat)
+  Try Me.ligne[Me.ind].AutresObj[Consigne] = cs
+  Me.ligne[Me.ind].chain.tableaux.Extract(1)
+  
+End
+
+'*******************Gestion des commandes et des fournisseurs
+Public Sub LitCommande(where As String, etat As Integer, TabStrip1 As TabStrip)    ''Lit et affiche une commande déja saisie
+  
+  Dim res As Result
+  Dim LecEcr As Integer
+  Dim GTar As GesTar
+  
+  Application.Busy += 1
+  If etat = Achat.EnCommande Then
+    where = Replace(where, "numrecpt", "numcom")
+    res = Utils.db.Exec("SELECT * FROM Fiches_Entcom JOIN Fiches_Ligcom ON Fiches_Entcom.four=Fiches_Ligcom.four AND  Fiches_Entcom.numcom=Fiches_Ligcom.numcom WHERE " & where & " ORDER BY nligne")
+    LecEcr = SaiLig.ecriture
+    numero = res!numcom
+  Else
+    res = Utils.db.Exec("SELECT * FROM Fiches_Entrecpt JOIN Fiches_Ligrecpt ON Fiches_Entrecpt.four=Fiches_Ligrecpt.four AND  Fiches_Entrecpt.numrecpt=Fiches_Ligrecpt.numrecpt WHERE " & where & " ORDER BY nligne")
+    If etat = Achat.Validee Then LecEcr = SaiLig.lecture Else LecEcr = Sailig.reception
+    
+    numero = res!numrecpt
+  Endif
+  If res.Available Then
+    commentaire = res!commentaire
+    res.MoveFirst()
+    Repeat
+'      If Not IsNull(Me.ligne[Me.ind].AutresObj) Then Me.ligne[Me.ind].AutresObj[Tarif].visible = False
+      Me.ajout(LecEcr)
+'      Raise ajou(Me.ligne[Me.ind])
+      Me.ligne[Me.ind].MonControle["Code"].Text = res!code
+      Me.ligne[Me.ind].MonControle["Code"].enabled = False
+      ligne_LecCode(res!code)
+      Me.ligne[Me.ind].MonControle["Qte"].Text = res!qte
+      Me.ligne[Me.ind].MonControle["Qte"].enabled = False
+      Me.ligne[Me.ind].MonControle["Px_Brut"].Text = res!pbht
+      Me.ligne[Me.ind].MonControle["Rem"].Text = Str(Val(res!rm) / 100) & "%"
+      Me.ligne[Me.ind].MonControle["Px_Net"].Text = res!paht
+      Me.ligne[Me.ind].MonControle["Frais"].Text = res!frais
+      Me.ligne[Me.ind].prx.Qte = Me.ligne[Me.ind].MonControle["Qte"].Value
+      calcul()
+      
+      If Me.opt = "B" Or Me.opt = "T" Then
+        fdc = New Fourconsdroi("M", LDate(res!ddate).L & numero & res!four)
+        Me.ligne[Me.ind].MonControle["Pal"].Text = fdc.recuppalette(Format(Me.ind + 1, "000"))
+        Me.ligne[Me.ind].MonControle["Col"].Text = fdc.recupcoli(Format(Me.ind + 1, "000"))
+        TabStrip1.Index = TabStrip1.Count - 1
+'        OptAr = New Artopt(TabStrip1, Me.opt, Me.ligne[Me.ind].frais, Me.ligne[Me.ind].pnet, Me.ligne[Me.ind].prev, Me.ligne[Me.ind].taxe, Me.ligne[Me.ind].art, TabStrip1)
+'        OptAr.Width = TabStrip1.Width
+'        OptAr.h = TabStrip1.h
+'        OptAr.Font = Font["+1"]
+'        OptAr.numart = Me.ligne[Me.ind].art.Text
+'        OptAr.Show
+'        Me.ongle.Add([OptAr])
+      Endif
+      Me.ligne[Me.ind].AutresObj[Tarif].LecArt = Me.ligne[Me.ind]
+'      Me.ligne[Me.ind].AutresObj[Tarif].PxRev = Me.ligne[Me.ind].MonControle["Px_Rev"].Value
+'      Me.ligne[Me.ind].arrondi = res!art_cdarr
+      Me.ligne[Me.ind].valide = False
+    Until res.MoveNext()
+  Endif
+  Application.Busy -= 1
+  
+End
+
+Private Function TotTtc_Read() As LPrix
+
+  Dim sl As SaiLig
+  Dim lp, lptot As LPrix
+  Dim tx As LTaxe
+  Dim res As Result
+  
+  lptot = New LPrix(0, 0, LPrix.Arr_01)
+  For Each sl In Me
+    lp = New LPrix(sl.prx.TotNTC.G, 1, LPrix.Arr_01)
+    tx = New LTaxe(sl.TxTva, LTaxe.TVA)
+    lp.add_taxe(tx)
+    lptot.Add(lp)
+  Next
+  Return lptot
+
+End

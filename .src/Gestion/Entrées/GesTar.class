@@ -1,0 +1,337 @@
+' Gambas class file
+
+Public Bsel As Boolean = False
+Public Bval As Variant = Null
+
+Private $resart As Result
+Private $targen As SaiTableau
+Private $tarpcli As SaiTableau
+Private $tartypcli As SaiTableau
+Private $ligart As SaiLig
+Private $prop As New ObjProp[]
+
+Property LecArt As Sailig  ''lorsque l'on met ou change de n°article
+Property PxRev As Float    ''Lorsque le prix de revient change
+
+Private Enum TarGen, TarCli, TarTcli
+
+Public Sub _new(Optional lig As SaiLig)
+
+  Dim obj As ObjProp
+  Dim res As Result
+  Dim obs As Observer
+  
+  Dim t1 As Integer = Me.Font.Size * 8.5
+  Dim t2 As Integer = Me.Font.Size * 2
+  Dim t3 As Integer = Me.Font.Size * 5
+  Dim t4 As Integer = Me.Font.Size * 12
+  
+  $ligart = lig
+  $resart = Utils.db.Exec("SELECT * FROM Fiches_Art JOIN Fiches_Tvaav ON art_tva=code_tva LEFT JOIN Fiches_TarTemp ON art_code=art  LIMIT 1")
+  If Not $resart.Available Then Return
+
+  'Tarif géneral sur fiche article
+  cre2($resart, t4, t2, t3, t4, False)
+  
+  Ptargen.w = t4 * 4
+  Ptargen.h = (Me.Font.H + 4) * 3
+  $targen = New SaiTableau($prop, Ptargen)
+  $targen.VisibleChoi = False
+  $targen.VisibleTot = False
+  $targen.VisibleTuto = False
+  $targen.show
+  $targen.ajout(Sailig.lecture)
+  $targen.ajout
+  obs = New Observer($targen.ligne[1].MonControle["Px_Rev"]) As "Px_Rev"
+  
+  'tarif par client
+  res = Utils.db.Exec("SELECT * FROM Fiches_Tarcli,Fiches_Cli,Fiches_TarTemp LIMIT 1")
+  $prop = New ObjProp[]
+  obj = New ObjProp(res.Fields["ccli"], "Numéro")
+  obj.AddChamp("reg", "[0-9]{0,8}")
+  obj.Height = Me.Font.H + 4
+  obj.Width = t1
+  $prop.Add(obj)
+  
+  obj = New ObjProp(Null, "Rechc", ObjProp.Button)
+  obj.Height = Me.Font.H + 4
+  obj.Width = t2
+  obj.AddChamp("Picture", Picture["Icones/next_frame.png"])
+  $prop.Add(obj)
+  
+  obj = New ObjProp(res.Fields["cli_nom"], "Nom")
+  obj.Height = Me.Font.H + 4
+  obj.Width = t1 * 2
+  obj.AddChamp("Enabled", False)
+  $prop.Add(obj)
+  
+  cre1(res, t1, t2, t3, t4)
+  cre2(res, t1, t2, t3, t4)
+  cli.w = t1 * 11 + t2 + 4
+  $tarpcli = New SaiTableau($prop, cli)
+  $tarpcli.VisibleChoi = False
+  $tarpcli.VisibleTot = False
+  $tarpcli.VisibleTuto = False
+  $tarpcli.show
+  
+   'tarif par type client
+  res = Utils.db.Exec("SELECT * FROM Fiches_TarTemp,Fiches_TarTypcli,Fiches_Typec LIMIT 1")
+  $prop = New ObjProp[]
+  obj = New ObjProp(res.Fields["type"], "Type")
+  obj.AddChamp("MaxLenght", 2)
+  obj.Height = Me.Font.H + 4
+  obj.Width = t3
+  $prop.Add(obj)
+  
+  obj = New ObjProp(Null, "Recht", ObjProp.Button)
+  obj.Height = Me.Font.H + 4
+  obj.Width = t2
+  obj.AddChamp("Picture", Picture["Icones/next_frame.png"])
+  $prop.Add(obj)
+  
+  obj = New ObjProp(res.Fields["libelle"], "Libellé")
+  obj.Height = Me.Font.H + 4
+  obj.Width = t1 * 2
+  obj.AddChamp("Enabled", False)
+  $prop.Add(obj)
+  
+  cre1(res, t1, t2, t3, t4)
+  cre2(res, t1, t2, t3, t4)
+  
+  Typec.w = (t1 * 10) + t2 + t3 + 4
+  $tartypcli = New SaiTableau($prop, Typec)
+  $tartypcli.VisibleChoi = False
+  $tartypcli.VisibleTot = False
+  $tartypcli.VisibleTuto = False
+  $tartypcli.show
+
+End
+
+Private Sub cre1(res As Result, t1 As Integer, t2 As Integer, t3 As Integer, t4 As Integer)
+
+  Dim obj As ObjProp
+  
+  obj = New ObjProp($resart.Fields["art_prvt"], "Px_Rev_Ar")
+  obj.AddChamp("numerique", True)
+   obj.AddChamp("Enabled", False)
+  obj.AddChamp("nbdec", $resart!art_nbd)
+  obj.AddChamp("Alignment", Align.Right)
+  obj.Height = Me.Font.H + 4
+  obj.Width = t1
+  $prop.Add(obj)
+  
+  obj = New ObjProp(res.Fields["coef"], "Coef_Ar")
+  obj.AddChamp("Enabled", False)
+  obj.AddChamp("reg", "-?[0-9]*[,.]?[0-9]{0,2}[%]{0,1}")
+  obj.AddChamp("Alignment", Align.Right)
+  obj.Height = Me.Font.H + 4
+  obj.Width = t1
+  $prop.Add(obj)
+  
+  obj = New ObjProp(Null, "Px_HT_Ar")
+  obj.AddChamp("numerique", True)
+   obj.AddChamp("Enabled", False)
+  obj.AddChamp("Alignment", Align.Right)
+  obj.AddChamp("nbdec", $resart!art_nbd)
+  obj.Height = Me.Font.H + 4
+  obj.Width = t1
+  $prop.Add(obj)
+  
+  obj = New ObjProp(Null, "Px_TTC_Ar")
+  obj.AddChamp("numerique", True)
+   obj.AddChamp("Enabled", False)
+  obj.AddChamp("nbdec", $resart!art_nbd)
+  obj.AddChamp("Alignment", Align.Right)
+  obj.Height = Me.Font.H + 4
+  obj.Width = t1
+  $prop.Add(obj)
+  
+End
+
+Private Sub cre2(res As Result, t1 As Integer, t2 As Integer, t3 As Integer, t4 As Integer, Optional cr As Boolean = True)
+
+  Dim obj As ObjProp
+  
+   obj = New ObjProp($resart.Fields["art_prvt"], "Px_Rev")
+  obj.AddChamp("numerique", True)
+  obj.AddChamp("Enabled", False)
+  obj.AddChamp("nbdec", $resart!art_nbd)
+  obj.AddChamp("Alignment", Align.Right)
+  obj.Height = Me.Font.H + 4
+  obj.Width = t1
+  $prop.Add(obj)
+  
+  obj = New ObjProp(res.Fields["temp_coef"], "Coef")
+  obj.AddChamp("reg", "-?[0-9]*[,.]?[0-9]{0,2}[%]{0,1}")
+  obj.AddChamp("Alignment", Align.Right)
+  obj.Height = Me.Font.H + 4
+  obj.Width = t1
+  $prop.Add(obj)
+  
+  obj = New ObjProp(Null, "Px_HT")
+  obj.AddChamp("numerique", True)
+  obj.AddChamp("Alignment", Align.Right)
+  obj.AddChamp("nbdec", $resart!art_nbd)
+  obj.Height = Me.Font.H + 4
+  obj.Width = t1
+  $prop.Add(obj)
+  
+  obj = New ObjProp(Null, "Px_TTC")
+  obj.AddChamp("numerique", True)
+  obj.AddChamp("nbdec", $resart!art_nbd)
+  obj.AddChamp("Alignment", Align.Right)
+  obj.AddChamp("Tag", cr)
+  obj.Height = Me.Font.H + 4
+  obj.Width = t1
+  $prop.Add(obj)
+  
+End
+'*********************************Tarif de base****************
+Public Sub LpxTarG_change(value As LPrix)
+
+  $targen.ligne[1].MonControle["Px_Rev"].value = Value.PuBHT.G
+  $targen.ligne[1].MonControle["Px_HT"].Value = value.PuNHT.G
+  $targen.ligne[1].MonControle["Px_TTC"].value = value.PuNTC.G
+
+End
+
+'*********************************Tarif par client********************
+Public Sub LpxTarCli_change(value As LPrix)
+  
+  $tarpcli.ligne[$tarpcli.ind].MonControle["Px_Rev"].value = Value.PuBHT.G
+  $tarpcli.ligne[$tarpcli.ind].MonControle["Px_HT"].Value = value.PuNHT.G
+  $tarpcli.ligne[$tarpcli.ind].MonControle["Px_TTC"].value = value.PuNTC.G
+  
+End
+
+
+'**********************************Tarif par type client****************************************************
+Public Sub LpxTarType_change(value As LPrix)
+  
+  $tartypcli.ligne[$tartypcli.ind].MonControle["Px_Rev"].value = Value.PuBHT.G
+  $tartypcli.ligne[$tartypcli.ind].MonControle["Px_HT"].Value = value.PuNHT.G
+  $tartypcli.ligne[$tartypcli.ind].MonControle["Px_TTC"].value = value.PuNTC.G
+  
+End
+
+'************propriétés
+Private Function LecArt_Read() As Sailig
+
+  Return Null
+
+End
+
+Private Sub LecArt_Write(Value As Sailig)
+
+  Dim res, rest As Result
+  Dim obj As ObjProp
+  Dim i As Integer
+  Dim lpx As LPrix
+  
+  $tarpcli.Tableau.Children.Clear
+  $tartypcli.Tableau.Children.Clear
+  
+  $resart = Utils.db.Exec("SELECT * FROM Fiches_Art JOIN Fiches_Tvaav ON art_tva=code_tva LEFT JOIN Fiches_TarTemp ON art_code=art WHERE art_code=&1 ", value.MonControle["Code"].Text)
+  If $resart.Available Then
+    Label1.Text = $resart!art_code & " " & $resart!art_design
+    For Each obj In $targen.$prop
+      If obj.name Then
+        For i = 0 To 1
+          If obj.NomControl = "Coef" Or obj.NomControl = "Coef_Ar" Then
+            If IsNull($resart[obj.name]) Then $targen.ligne[i].MonControle[obj.NomControl].Text = "" Else $targen.ligne[i].MonControle[obj.NomControl].Text = Str(($resart[obj.name] - 1) * 100) & "%"
+          Else
+            $targen.ligne[i].MonControle[obj.NomControl].Text = $resart[obj.name]
+          Endif
+          $targen.ligne[i].arrondi = $resart!art_cdarr
+        Next
+      Endif
+    Next
+    $targen.ligne[1].prx = New LPrix($resart!art_prvt, 1, LPrix.Arr_0001) As "LpxTarG"
+    If Not IsNull($targen.ligne[1].MonControle["Coef"].Text) Then 
+      $targen.ligne[1].txl = New LTaxe("-" & $targen.ligne[1].MonControle["Coef"].Text, LTaxe.Remise)
+      $targen.ligne[1].prx.add_taxe($targen.ligne[1].txl)
+    Endif
+    $targen.ligne[1].txl = New LTaxe($resart!taux_tva & "%", LTaxe.TVA)
+    $targen.ligne[1].prx.add_taxe($targen.ligne[1].txl)
+  
+    res = Utils.db.Exec("SELECT * FROM Fiches_Tarcli LEFT JOIN Fiches_Cli ON cli_code=ccli LEFT JOIN Fiches_Art ON art_code=cart LEFT JOIN Fiches_TarTemp ON art=art_code AND temp_type=&2 WHERE cart=&1", value.MonControle["Code"].Text, TarCli)
+    If res.Available Then
+      Repeat
+        $tarpcli.ajout
+        i = $tarpcli.ind
+        For Each obj In $tarpcli.$prop
+          If obj.name Then 
+            If obj.NomControl = "Coef" Then
+              If Not IsNull(res[obj.name]) Then $tarpcli.ligne[i].MonControle[obj.NomControl].Text = Str((res[obj.name] - 1) * 100) & "%"
+            Else
+              $tarpcli.ligne[i].MonControle[obj.NomControl].Text = res[obj.name]
+            Endif
+          Endif
+        Next
+        $tarpcli.ligne[i].prx = New LPrix($tarpcli.ligne[i].MonControle["Px_Rev"].Value, 1, res!art_cdarr) As "LpxTarCli"
+        calprv($tarpcli.ligne[i], $tarpcli.ligne[i].MonControle["Px_Rev"].Value)
+      Until res.MoveNext()
+    Endif
+    
+    res = Utils.db.Exec("SELECT * FROM Fiches_TarTypcli LEFT JOIN Fiches_Typec ON code=type LEFT JOIN Fiches_Art ON  art_code=cart LEFT JOIN Fiches_TarTemp ON cart=art WHERE cart=&1", value.MonControle["Code"].Text)
+    If res.Available Then
+      Repeat
+        $tartypcli.ajout
+        i = $tartypcli.ind
+        For Each obj In $tartypcli.$prop
+          If obj.name Then 
+            If obj.NomControl = "Coef" Or obj.NomControl = "Coef_Ar" Then
+              If IsNull(res[obj.name]) Then $tartypcli.ligne[i].MonControle[obj.NomControl].Text = "" Else $tartypcli.ligne[i].MonControle[obj.NomControl].Text = Str((res[obj.name] - 1) * 100) & "%"
+            Else
+              $tartypcli.ligne[i].MonControle[obj.NomControl].Text = res[obj.name]
+            Endif
+          Endif
+        Next
+        $tartypcli.ligne[i].prx = New LPrix($tartypcli.ligne[i].MonControle["Px_Rev"].Value, 1, res!art_cdarr) As "LpxTarType"
+        calprv($tartypcli.ligne[i], $tartypcli.ligne[i].MonControle["Px_Rev"].Value)
+      Until res.MoveNext()
+    Endif
+  Endif
+  
+  $tarpcli.ajout
+  $tartypcli.ajout
+  
+End
+
+Private Function PxRev_Read() As Float
+
+  Return Null
+
+End
+
+Private Sub PxRev_Write(Value As Float)
+
+  Dim lg As Sailig
+  
+  lg = $targen.ligne[1]
+  If IsNull(lg.prx) Then Return
+  calprv(lg, value)
+
+  For Each lg In $tarpcli
+    calprv(lg, Value)
+  Next
+  
+  For Each lg In $tartypcli
+    calprv(lg, Value)
+  Next
+  
+End
+
+Private Sub calprv(lg As Sailig, value As Float)
+
+  If IsNull(lg.prx) Then Return
+  lg.MonControle["Px_Rev"].Value = value
+  lg.prx.Mnt = value
+  If lg.MonControle["Coef"].Text Then
+    lg.txl = New LTaxe("-" & lg.MonControle["Coef"].Text, LTaxe.Remise)
+    lg.prx.add_taxe(lg.txl)
+   Endif
+  lg.txl = New LTaxe($resart!taux_tva & "%", LTaxe.TVA)
+  lg.prx.add_taxe(lg.txl)
+  
+End
