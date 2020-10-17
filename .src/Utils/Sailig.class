@@ -1,0 +1,209 @@
+' Gambas class file
+
+Public chain As New Chainage(Null)
+Public valide As Boolean = True 
+Public MonControle As New Collection        ''On stock les objets (TextReg,boutons, labels ...)
+Public Panel1 As Panel
+Public prx As LPrix
+Public txl As LTaxe
+Public arrondi As Variant
+Public Tag As Variant
+Public AutresObj As Object[]            ''On stock les objets assignés à la ligne de saisie (Tarifs, consignes ....)
+
+Private $coul As Integer = Color.white
+Private $Height As Integer
+Private $prop As ObjProp[]
+Private $etat As Integer
+
+Event RetLigne(etat As Integer)    ''retour ligne + création si besoin
+Event SupLig(etat As Integer)          ''Suprime 1 ligne
+Event InsLig(etat As Integer)            ''Insert 1 ligne
+Event Haut(etat As Integer)              ''Deplace 1 ligne vers le haut
+Event Bas(etat As Integer)                 ''Deplace 1 ligne vers le bas
+Event GotFocus(Data As Sailig)
+Event LostFocus(Data As Sailig)
+Event ctrl(Value As Integer)            ''Combinaison de touche ctrl + code ascii
+Event alt(Value As Integer)            ''combinaison de touche alt + code ascii
+
+Property Background As Integer
+Property X As Integer
+Property Y As Integer
+
+Public Enum lecture, ecriture, reception
+
+
+Public Sub _new(Optional prop As ObjProp[], parent As Control, etat As Integer = ecriture)
+
+  Dim obj As ObjProp
+  Dim clas As Object
+  Dim obs As Observer
+  
+  $prop = prop
+  Panel1 = New Panel(parent)
+  Panel1.Font = parent.Font
+  Panel1.W = parent.W
+  Panel1.H = parent.Font.H + 4
+  Panel1.Arrangement = Arrange.Horizontal
+'  obs = New Observer(Panel1) As "groupe"
+  
+  $etat = etat
+  For Each obj In prop
+    Select Case obj.TypeClass
+
+      Case ObjProp.TextBox
+        clas = New TextBox(Panel1) 
+        obs = New Observer(clas) As "groupe"
+        chain.add(clas)
+      Case ObjProp.TextReg
+        clas = New TextReg(Panel1) 
+        obs = New Observer(clas) As "groupe"
+        chain.add([clas])
+      Case ObjProp.Label
+        clas = New Label(Panel1)
+      Case ObjProp.Button 
+        clas = New Button(Panel1) 
+      Case ObjProp.TextLabel
+        clas = New TextLabel(Panel1)
+    End Select
+    If $etat = lecture Then Try clas.enabled = False
+    clas.name = obj.NomControl
+    obj.AppProp(clas)
+    clas.show
+    If clas.H = 0 And clas.W = 0 Then clas.expand = True
+    MonControle.Add(clas, obj.NomControl)
+  Next
+  If MonControle[MonControle.Last].Tag = Null Then MonControle[MonControle.Last].Tag = True
+  MonControle[MonControle.First].setfocus
+  
+End
+
+Public Sub Delete()
+
+  Dim obj As Object
+  
+  For Each obj In Panel1.Children
+    Try obj.Delete
+    chain.sup(obj)
+  Next
+  Panel1.Delete
+  For Each obj In AutresObj
+    Try obj.Delete
+  Next
+  Try AutresObj.Extract(0, -1)
+  MonControle.Clear
+
+End
+
+Public Sub groupe_lostfocus()
+
+  Raise LostFocus(Me)
+  
+End
+
+Public Sub groupe_gotfocus()
+
+  Raise GotFocus(Me)
+  
+End
+
+Public Sub groupe_keypress()
+
+  Dim kctrl As Boolean = Key.Control
+  Dim kalt As Boolean = Key.Alt 
+  Dim ok As Boolean
+  Dim obj As Object
+  
+  If kctrl Then
+    ok = Raise ctrl(Key.Code)
+    If ok Then Return
+  Endif
+  If kalt Then 
+    ok = Raise alt(Key.Code)
+    If ok Then Return
+  Endif
+  
+  Select Case Key.Code
+    Case Key.Enter, Key.Return
+      If kctrl Then
+        ok = Raise RetLigne($etat)
+        If ok Then Stop Event
+      Else
+        If Last.tag = True Then 
+          ok = Raise RetLigne($etat)
+          If ok Then Stop Event
+        Endif
+      Endif
+    
+    Case Key.Tab
+       If Last.tag = True Then 
+        ok = Raise RetLigne($etat)
+        If ok Then Stop Event
+      Endif
+      
+    Case Key.Insert
+      If $etat = ecriture Then Raise InsLig($etat)
+      
+    Case Key.Delete
+      If $etat = ecriture Then Raise SupLig($etat)
+      
+    Case Key.Up
+      If kalt Then 
+        If $etat = ecriture Then Raise haut($etat)
+        Stop Event
+      Endif
+      
+    Case Key.Down
+      If kalt Then 
+        If $etat = ecriture Then Raise Bas($etat)
+        Stop Event
+        Return
+      Endif
+      If Last.tag = True Then 
+        ok = Raise RetLigne($etat)
+        If ok Then Stop Event
+      Endif
+  End Select
+  
+End
+
+Private Function Background_Read() As Integer
+
+  Return $coul
+
+End
+
+Private Sub Background_Write(Value As Integer)
+
+  Dim obj As Object
+  
+  $coul = value
+  For Each obj In MonControle
+    obj.Background = Value
+  Next
+  Panel1.Background = value
+
+End
+
+Private Function X_Read() As Integer
+
+  Return Panel1.X
+
+End
+
+Private Sub X_Write(Value As Integer)
+
+  Panel1.X = value
+
+End
+
+Private Function Y_Read() As Integer
+
+  Return Panel1.Y
+
+End
+
+Private Sub Y_Write(Value As Integer)
+
+  Panel1.Y = value
+
+End
