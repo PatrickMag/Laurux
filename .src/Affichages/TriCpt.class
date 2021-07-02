@@ -76,6 +76,7 @@ Dim f As String
       Tricli
       
     Case Fournisseur
+      fou.Visible = False
       Pchoix.Visible = True
       clifou.Visible = False
       cli.Visible = False
@@ -133,7 +134,7 @@ Private Sub debut()
   k = "----code----"
   $prop = New ObjProp($res.Fields["compte_cc"], k)
   $Col.Add($prop, "----code----")
-  k = "-------------intitule-------------"
+  k = "---------------nom---------------"
   $prop = New ObjProp($Res.Fields["intitule_cc"], k)
   $prop.tri = True
   $Col.Add($prop, k)
@@ -144,7 +145,6 @@ Private Sub Tritous()
 
   $req = "SELECT CAST(compte_cc AS char) AS compte_cc,intitule_cc,type_cc " & $cond & " FROM Fiches_Comptes"
   $res = Utils.db.Exec($req)
-  If Not $res.Available Then Return
   Me.Width = Me.Width / 2.5
   Panel1.Width = Panel1.Width / 2.5
   debut()
@@ -163,7 +163,6 @@ Private Sub Tricli()
   cond &= " "
   $req = "SELECT CAST(compte_cc AS char) AS compte_cc,intitule_cc,type_cc,cli_pnm,cli_adr1, cli_cd_ptl,cli_ville " & $cond & cond & " FROM Fiches_Comptes JOIN Fiches_Cli ON compte_cc=cli_code "
   $res = Utils.db.Exec($req)
-  If Not $res.Available Then Return
   debut()
   k = "-------Prénom-------"
   $prop = New ObjProp($Res.Fields["cli_pnm"], k)
@@ -194,7 +193,6 @@ Private Sub Trilivr()
   cond &= " "
   $req = "SELECT CAST(compte_cc AS char) AS compte_cc,nom,pnm,adr1, adr2 ,cd_ptl,ville " & $cond & cond & " FROM (Fiches_Comptes JOIN Fiches_AdrlivC ON compte_cc=code) JOIN Fiches_Cli ON compte_cc=cli_code "
   $res = Utils.db.Exec($req)
-  If Not $res.Available Then Return
   k = "----code----"
   $prop = New ObjProp($res.Fields["compte_cc"], k)
   $Col.Add($prop, "----code----")
@@ -231,7 +229,6 @@ Private Sub Tricont()
   cond &= " "
   $req = "SELECT CAST(compte_cc AS char) AS compte_cc,nom, pnm,fonction, intitule_cc, cli_adr1, cli_cd_ptl, cli_ville " & $cond & cond & " FROM (Fiches_Comptes JOIN Fiches_ContactC ON compte_cc=code) JOIN Fiches_Cli ON compte_cc=cli_code "
   $res = Utils.db.Exec($req)
-  If Not $res.Available Then Return
   k = "----code----"
   $prop = New ObjProp($res.Fields["compte_cc"], k)
   $Col.Add($prop, "----code----")
@@ -267,7 +264,6 @@ Private Sub Tricontfour()
   
   $req = "SELECT CAST(compte_cc AS char) AS compte_cc,nom, pnm,fonction, intitule_cc, fo_adr1 ,fo_cd_ptl, fo_ville " & $cond & " FROM (Fiches_Comptes JOIN Fiches_ContactF ON compte_cc=code) JOIN Fiches_Four ON compte_cc=fo_code "
   $res = Utils.db.Exec($req)
-  If Not $res.Available Then Return
   k = "----code----"
   $prop = New ObjProp($res.Fields["compte_cc"], k)
   $Col.Add($prop, "----code----")
@@ -304,7 +300,6 @@ Private Sub Trifou()
   
   $req = "SELECT CAST(compte_cc AS char) AS compte_cc,intitule_cc, fo_adr1, fo_adr2 ,fo_cd_ptl, fo_ville " & $cond & " FROM Fiches_Comptes JOIN Fiches_Four ON compte_cc = fo_code "
   $res = Utils.db.Exec($req)
-  If Not $res.Available Then Return
   debut()
   k = "--------------Adresse 1--------------"
   $prop = New ObjProp($Res.Fields["fo_adr1"], k)
@@ -328,7 +323,6 @@ Private Sub Triclifou()
   $req = "SELECT * FROM (SELECT CAST(compte_cc AS char) AS compte_cc,intitule_cc,type_cc,cli_adr1 AS adr1,cli_adr2 AS adr2,cli_cd_ptl AS cp,cli_ville AS ville " & $cond & " FROM Fiches_Comptes JOIN Fiches_Cli ON compte_cc=cli_code " &
       "UNION SELECT CAST(compte_cc AS char) AS compte_cc,intitule_cc,type_cc,fo_adr1 AS adr1,fo_adr2 AS adr2,fo_cd_ptl AS cp,fo_ville AS ville " & $cond & "  FROM Fiches_Comptes JOIN Fiches_Four ON compte_cc = fo_code) AS a "
   $res = Utils.db.Exec($req)
-  If Not $res.Available Then Return
   debut()
   k = "--------------Adresse 1--------------"
   $prop = New ObjProp($Res.Fields["adr1"], k)
