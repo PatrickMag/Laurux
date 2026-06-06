@@ -1347,6 +1347,7 @@ Public Sub mail()
     Try $mail = tMail[1]
   prt.OutputFile = User.Home & "/tmp/BonCommande.pdf"
   rep.Print(prt)
+  Try Shell "ocrmypdf --skip-text " & User.Home & "/tmp/BonCommande.pdf " & User.Home & "/tmp/BonCommande.pdf" Wait 
   EnvMail.Envoi2($mail, "Notre commande du " & $dte.L, "Bonjour, \nMerci de bien vouloir prendre en compte notre commande ci_jointe \nCordialement.", prt.OutputFile)
   
 End

@@ -884,12 +884,15 @@ Public Sub CopieGedFac()
   imp.NumCopies = 1
   imp.OutputFile = User.Home & "/tmp/Facture.pdf"
   edit.Print(imp)
+  Try Shell "ocrmypdf --skip-text " & User.Home & "/tmp/Facture.pdf " & User.Home & "/tmp/Facture.pdf" Wait 
+  ty = nom()
+  If Exist(User.Home & "/tmp/" & ty & ".pdf") Then Kill User.Home & "/tmp/" & ty & ".pdf"
+  Copy User.Home & "/tmp/Facture.pdf" To User.Home & "/tmp/" & ty & ".pdf"
   resent.MoveFirst
   If resent!imp = 1 Then Return
-  ty = nom()
   If sauvpdf Then
     imp.NumCopies = 1
-    edit.Print(imp)
+    'edit.Print(imp)
     If IsNull($numfac) Then
       code = $numbl
     Else
@@ -927,6 +930,7 @@ Public Sub CopieGedFac()
       imp.OutputFile = chemin & "/" & ty & ".pdf"
       imp.NumCopies = 1
       edit.Print(imp)
+      Try Shell "ocrmypdf --skip-text " & User.Home & "/Impressions " & User.Home & "/Impressions" Wait
   Endif
   
 End

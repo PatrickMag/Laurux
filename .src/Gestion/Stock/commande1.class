@@ -475,6 +475,7 @@ Public Sub imprime_Click()
   If IsNull(rep) Then Return
   prt.OutputFile = User.Home & "/tmp/BonReception.pdf"
   rep.Print(prt)
+  Try Shell "ocrmypdf --skip-text " & User.Home & "/tmp/BonReception.pdf " & User.Home & "/tmp/BonReception.pdf" Wait 
   Visualiseur.Prog(prt.OutputFile)
   If $etat = Achat.Reception And $Apdf Then ged()
 
@@ -619,6 +620,7 @@ Private Sub ValCom() As Boolean
   prt = New Printer
   prt.OutputFile = User.Home & "/tmp/BonReception.pdf"
   rep.Print(prt)
+  Try Shell "ocrmypdf --skip-text " & User.Home & "/tmp/BonReception.pdf " & User.Home & "/tmp/BonReception.pdf" Wait 
   If $Apdf Then ged()
   Return False
   
@@ -824,6 +826,7 @@ Public Sub rececp_Click()
       If IsNull(rep) Then Return
       prt.OutputFile = User.Home & "/tmp/BonReception.pdf"
       rep.Print(prt)
+      Try Shell "ocrmypdf --skip-text " & User.Home & "/tmp/BonReception.pdf " & User.Home & "/tmp/BonReception.pdf" Wait 
       If $Apdf Then ged()
       annul_Click()
       If tbl.CreReliquat() Then

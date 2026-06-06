@@ -986,6 +986,7 @@ Public Sub vldsaisie_Click()
     imp = ereg.FinImp(imp)
     prt.OutputFile = User.Home & "/tmp/EcrReg.pdf"
     imp.Print(prt)
+    Try Shell "ocrmypdf --skip-text " & User.Home & "/tmp/EcrReg.pdf " & User.Home & "/tmp/EcrReg.pdf" Wait 
     Visualiseur.Prog(prt.OutputFile)
   Endif
   
@@ -1067,6 +1068,7 @@ Public Sub vldbordereau_Click()
       imp = ereg.FinImp(imp)
       prt.OutputFile = User.Home & "/tmp/EcrReg.pdf"
       imp.Print(prt)
+      Try Shell "ocrmypdf --skip-text " & User.Home & "/tmp/EcrReg.pdf" & User.Home & "/tmp/EcrReg.pdf" Wait 
       Visualiseur.Prog(prt.OutputFile)
     Endif
     $modif = False
@@ -1099,6 +1101,7 @@ Private Sub impecr(ereg As EcrReg)
   If Object.IsValid(imp) Then
     prt.OutputFile = User.Home & "/tmp/EcrReg.pdf"
     imp.Print(prt)
+    Try Shell "ocrmypdf --skip-text " & User.Home & "/tmp/EcrReg.pdf " & User.Home & "/tmp/EcrReg.pdf" Wait 
     Visualiseur.Prog(prt.OutputFile)
   Endif
   
@@ -1115,6 +1118,7 @@ Public Sub editions_Click()
   ed = New EdReg($Lecr, EdReg.ajout, $resreg)
   imp.OutputFile = User.Home & "/tmp/Bordereau.pdf"
   ed.Print(imp)
+  Try Shell "ocrmypdf --skip-text " & User.Home & "/tmp/Bordereau.pdf " & User.Home & "/tmp/Bordereau.pdf" Wait 
   Visualiseur.Prog(User.Home & "/tmp/Bordereau.pdf")
 
 End
@@ -1128,6 +1132,7 @@ Public Sub editionb_Click()
   ed = New EdReg($Lecr, EdReg.tous, $resreg)
   imp.OutputFile = User.Home & "/tmp/Bordereau.pdf"
   ed.Print(imp)
+  Try Shell "ocrmypdf --skip-text " & User.Home & "/tmp/Bordereau.pdf " & User.Home & "/tmp/Bordereau.pdf" Wait 
   Visualiseur.Prog(User.Home & "/tmp/Bordereau.pdf")
 
 End

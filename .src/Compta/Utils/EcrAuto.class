@@ -577,6 +577,7 @@ Private Sub ged()
   impr.Count = 1
   prt.OutputFile = User.Home & "/tmp/Ecriture.pdf"
   impr.Print(prt)
+  Try Shell "ocrmypdf --skip-text " & User.Home & "/tmp/Ecriture.pdf " & User.Home & "/tmp/Ecriture.pdf" Wait 
   lg = LGed.Search(LGed.Comptabilite, numecr, "", "Compta")
   If IsNull(lg)
     lg = New LGed(Null, 0, LGed.Comptabilite, "Compta", numecr, "")

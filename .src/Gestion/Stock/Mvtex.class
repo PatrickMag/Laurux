@@ -742,6 +742,7 @@ Private Sub imprim(bvign As Boolean, bdroit As Boolean, nvign As String)
   Until Colrcp.MoveNext()
   
    rep.Print(prt)
+   Try Shell "ocrmypdf --skip-text " & Filename & " " & Filename Wait 
    Visualiseur.Prog(Filename)
   
 End

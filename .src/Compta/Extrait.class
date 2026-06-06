@@ -1426,6 +1426,7 @@ Public Sub butedit_Click()
   lab.Alignment = Align.Right
   
   $rpt.Print(prt)
+  Try Shell "ocrmypdf --skip-text " & Filename & " " & Filename Wait 
   Visualiseur.Prog(Filename)
   pgb.Close
   

@@ -801,6 +801,7 @@ Public Sub visualisation()        ''Visualisation d'un bl ou d'une facture
   Me.imp.OutputFile = Filename
   Me.imp.NumCopies = 1
   Me.edit.Print(Me.imp)
+  Try Shell "ocrmypdf --skip-text " & User.Home & "/tmp/Facture.pdf " & User.Home & "/tmp/Facture.pdf" Wait 
   Visualiseur.Prog(Filename)
   Me.choix = ch
   

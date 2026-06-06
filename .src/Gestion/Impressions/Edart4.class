@@ -163,6 +163,7 @@ Public Sub Butimp_Click()
     Endif
   Until TreeView1.MoveBelow()
   $rpt.Print(prt)
+  Try Shell "ocrmypdf --skip-text " & Filename & " " & Filename Wait 
   Visualiseur.Prog(Filename)
   
 End
