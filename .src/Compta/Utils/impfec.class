@@ -121,7 +121,7 @@ Private Function ctrl() As Boolean      'control avant importation
   'Lecture et controle du fichier
   i = 0
   $hfile = Open FileChooser1.Value For Read
-  $hfile.EndOfLine = gb.Windows
+  If Checkfinligne.Value Then $hfile.EndOfLine = gb.Windows Else $hfile.EndOfLine = gb.Unix
   
   While Not Eof($hfile)
     Line Input #$hfile, ligne
