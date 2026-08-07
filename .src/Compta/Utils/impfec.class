@@ -220,7 +220,7 @@ Private Sub trat()
   Endif
   sperar = carsep()
   $hfile = Open FileChooser1.Value For Read
-  $hfile.EndOfLine = gb.Windows
+  If Checkfinligne.Value Then $hfile.EndOfLine = gb.Windows Else $hfile.EndOfLine = gb.Unix
   Utils.db.Begin
   
   While Not Eof($hfile)
@@ -265,7 +265,9 @@ Private Sub trat()
       res!lettree = False
     Endif
     res!libelle = Left(Trim(strs[10]), 50)
-    res!montantd = Val(Trim(Strs[11]))
+    If Trim(strs[11]) = "" Then strs[11] = "0"
+    If Trim(strs[12]) = "" Then strs[12] = "0"
+    res!montantd = Val(Trim(strs[11]))
     res!montantc = Val(Trim(Strs[12]))
     res!validee = True
     res!provisoire = False
