@@ -659,7 +659,8 @@ Private Sub calc(numlig As String)
   Dim ind As Integer
   
   'on crée la ligne à editer
-  txtva = (reslig!mtx_ligfac / 100) + 1
+  Try txtva = (reslig!mtx_ligfac / 100) + 1
+  If Error Then txtva = 1
   If reslig!typel_ligbl = "A" Then
     resart = Utils.db.Exec("SELECT * FROM Fiches_Art WHERE art_code=&1", reslig!code_ligbl)
     'somme des éco taxes
