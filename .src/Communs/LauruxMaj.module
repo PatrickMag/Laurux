@@ -5286,7 +5286,7 @@ end_utf8:
     PB.Finalize()
     PB.Close()
     Utils.db.Commit
-  Endif
+  Endif 
   
   'Modification de la caisse
   PB = New ProgBar("Modification des caisses", 4)
@@ -5302,6 +5302,7 @@ end_utf8:
   Try Utils.db.Exec("ALTER TABLE " & Tab1 & " add (vdr_code char(2))")
   Try Utils.db.Exec("ALTER TABLE " & Tab1 & " MODIFY tkz tinyint(1)")
   Try Utils.db.Exec("ALTER TABLE " & Tab1 & " MODIFY connecte tinyint(1)")
+  Try Utils.db.Exec("ALTER TABLE " & Tab1 & " MODIFY poste char(100)")
 
   PB.Avancement("Table Tickets", 1)
   rResult = Utils.db.Exec("SELECT * FROM " & Tab1 & " ")

@@ -119,7 +119,7 @@
     MoveScaled(14,35,23,3)
     Font = Font["Serif,-1"]
     Tag = "5"
-    MaxLength = 30
+    MaxLength = 100
   }
   { Label6 Label
     MoveScaled(1,23,13,3)
